@@ -50,6 +50,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("inputfile", help="provides a name of results file to read")
 parser.add_argument("-w","--WT", action="store_true", help ="generates well tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
+parser.add_argument("-c","--CPT", action="store_true", help ="generates crossplots by certain date")
 args = parser.parse_args()
 
 currDir = os.path.dirname( os.path.abspath(args.inputfile))
@@ -70,15 +71,19 @@ try:
     numsArray = out[2]
     RateOut = out[3]
 
+    if args.CPT:
+        # выгрузка кроссплотов 
+        getcpt.getCPT(currDir, rootName, startDate, times, numsArray, RateOut)      
 
     if args.WT:
         # выгрузка показателей по ГДИ
         getwt.getWT(currDir, rootName, startDate, times, numsArray, RateOut)      
-    elif args.PLT:
+
+    if args.PLT:
         # выгрузка профилей притока 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
-    else:
-        print("no action chosen for {}".format(rootName))
+#    else:
+#        print("no action chosen for {}".format(rootName))
 
 
     #printRate(times, numsArray, RateOut) 

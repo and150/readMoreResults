@@ -4,6 +4,8 @@ from getbindata import getBinData
 import constants
  
 def readRATE (file, nums=[], nrate = 0):
+    # nums[] - массив адресов показателей
+    # nrate - количество временных шагов в файле rat
 
     class RatesHeader:
     # local class of 1-st time step header    
@@ -72,16 +74,31 @@ def readRATE (file, nums=[], nrate = 0):
 
     mstr = 5 # manual page 10
 
-    #print(nquant)
-    #print(nstr)    
-    #print(nqchar, nqinte, nqreal) # debug output
-    #print(nqinte, nqreal)
-
     #######################################################
 
     #READ HEADER DATA
-    V = constants.VEC + mwzone*2*IWVCMP # 6 векторов (расч. и факт. дебиты нефти и воды и давление) + кол-во слоев * 2 (нефть и вода) если есть вывод по соединениям  
-    ResArr = [0]*nrate*V*mw  # [шаги][параметры][скважины]
+    nbi =  constants.NBINT # number of bytes in integer
+    nbf =  constants.NBFLOAT # number of bytes in float
+    nbr =  constants.NBREAL # number of bytes in real
+    V = constants.VEC + mwzone*2*IWVCMP # number of base vectors + number of layers* 2 (oil, water) if output by layers is present  
+    #indexes of vectors
+    Sopr  = constants.Sopr
+    Swpr  = constants.Swpr 
+    Sbhp  = constants.Sbhp
+                 
+    Sopt  = constants.Sopt  
+    Swpt  = constants.Swpt  
+    Swit  = constants.Swit  
+
+    Hopr  = constants.Hopr  
+    Hwpr  = constants.Hwpr  
+    Hbhp  = constants.Hbhp  
+    Hwefa = constants.Hwefa 
+
+
+
+
+    ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
 
     WNAMES = getBinData(file,'char16',mw,) #Well names   
     GNAMES = getBinData(file,'char16',mg,) #Group names  
@@ -93,11 +110,12 @@ def readRATE (file, nums=[], nrate = 0):
     qwprh = [-1]*mw
     qbhph = [-1]*mw  
     qwirh = [-1]*mw      
+    qwefa = [-1]*mw      
 
     #read quantity data (Mnemonics, Units, Associated names, Descriptions) !!!need check!!!!
     HARR = [] # массив заголовков векторов скважин (дополнительных вектров  miscellaneous???? 
     for i in range(0,nquant): 
-        block = file.read(nqchar+nqinte*4+nqreal*4)
+        block = file.read(nqchar+nqinte*nbi+nqreal*nbr)
         rh = RatesHeader()
         rh.getData(block)
         HARR.append(rh)
@@ -127,7 +145,7 @@ def readRATE (file, nums=[], nrate = 0):
     
     #READ RATES DATA    
 
-    leng =(nstr+ncompt+1)*(nphas+2)+2*nstr+4*ncompt+2*ncompt*mwzone # General group data float*4
+    leng =(nstr+ncompt+1)*(nphas+2)+2*nstr+4*ncompt+2*ncompt*mwzone # General group data float*4 manual page 11
 
     #buffer arrays for data recording   
     iarr = array.array('l')
@@ -136,24 +154,19 @@ def readRATE (file, nums=[], nrate = 0):
     wtype = [0]*mw  # trigger of well type
     compArr = []  # array for well completion
 
-    #intSize = 4
-    #floatSize =4   
     # расчет длины считываемого блока 
-    wlen =  4*(NIIRATE + NIIRPTR*mwzone + mwl*2 + NIWRATE + 3*mstr + ncompt*3 + NIWMCMP*mwzone + ncompt*mwzone + IWVCMP*NIWVCMP*mwzone +  IWVLAY*NIWVLAY*mwzone)
-    glen =  4*(1 + leng + NIGRVOL*nstr + mw + NIGVLAY*mwzone)
-    aqlen = 4*NIRAQU
-    totlen =  mw*wlen + mg*glen + aqlen*NAQUIF + nquant*4
+    wlen =  nbi*(NIIRATE + NIIRPTR*mwzone + mwl*2)  + nbf*(NIWRATE + 3*mstr + ncompt*3 + NIWMCMP*mwzone + ncompt*mwzone + IWVCMP*NIWVCMP*mwzone + IWVLAY*NIWVLAY*mwzone)
+    glen =  nbi*1 + nbf*(leng + NIGRVOL*nstr + mw + NIGVLAY*mwzone)
+    aqlen = nbf*NIRAQU
+    totlen =  mw*wlen + mg*glen + aqlen*NAQUIF + nquant*nbr
     #print(wlen," ", glen, " ", aqlen, " ", nquant, " ",totlen)
 
-    for n in range(0,nrate):  #BY STEPS
-        # проверка чтения всего временного шага (пока только в формате float(??? возможно будет неправильно интерпретировать int))
-        #del farr[:]
-        #farr.fromfile(file, mw*(NIIRATE + NIIRPTR*mwzone + mwl*2 + NIWRATE + 3*mstr + ncompt*3 + NIWMCMP*mwzone + ncompt*mwzone + NIWVCMP*mwzone +  NIWVLAY*mwzone)  +  mg*(1 + leng + NIGRVOL*nstr + mw + NIGVLAY*mwzone)  +  NAQUIF*NIRAQU  + nquant )
-        #line = file.read(mw*(NIIRATE + NIIRPTR*mwzone + mwl*2 + NIWRATE + 3*mstr + ncompt*3 + NIWMCMP*mwzone + ncompt*mwzone + NIWVCMP*mwzone +  NIWVLAY*mwzone)  +  mg*(1 + leng + NIGRVOL*nstr + mw + NIGVLAY*mwzone)  +  NAQUIF*NIRAQU  + nquant )
+    # by timesteps
+    for n in range(0,nrate): 
        
         # чтение записи для одного временного шага
         line = file.read(totlen )
-        #print(struct.unpack('i'*tt,line))
+        #print(struct.unpack('i'*tt,line)) # debug output
 
         #if n%50==0:
         #    print("STEP ",n)     # debug output                      
@@ -162,92 +175,84 @@ def readRATE (file, nums=[], nrate = 0):
         # READ WELL RATES        
         s = 0
         f = 0
+        # by wells
         for j in range(0,mw):                                      
+
+            # irate       # Integer well data    int*4
             del iarr[:]                         
             s = j*wlen 
-            f = s + NIIRATE*4
-            iarr.frombytes(line[s:f])          #irate        # Integer well data                 int*4    
-            #print(iarr," ", s," ",f)   
+            f = s + NIIRATE*nbi
+            iarr.frombytes(line[s:f])              
             wtype[j] = iarr[7]  #wtype = buffArr[7]          # запоминаем текущий тип скважины (1 - добывающая, -1 - нагнетательная)
-            #print(wtype)
-            
-            #line.seek(NIIRPTR*mwzone*intSize,1)
+
+        
+            # irptr       # Completion location data          int*4
             del iarr[:]
             s = f 
-            f = s + NIIRPTR*mwzone*4
+            f = s + NIIRPTR*mwzone*nbi
             iarr.frombytes(line[s:f])
             compArr = iarr[mwzone*3:mwzone*4] # запоминаем массив номеров текущих активных соединений
 
-            #for k in range(0,NIIRPTR):            #irptr        # Completion location data          int*4    
-            #    file.seek(mwzone*intSize,1)       #irptr 
+
+            # irlim       # Well constraint information       int*4
+            #line.seek(mwl*2*intSize,1)            
 
 
-            #line.seek(mwl*2*intSize,1)            #irlim        # Well constraint information       int*4
-
+            #wrate     # Miscellaneous well data          float*4
             del farr[:]
-            s = f + mwl*2*4
-            f = s + NIWRATE*4
-            farr.frombytes(line[s:f])      #wrate        # Miscellaneous well data          float*4
+            s = f + mwl*2*nbi
+            f = s + NIWRATE*nbf
+            farr.frombytes(line[s:f])      
             #print(farr)
-            ResArr[nrate*V*j + nrate*2 + n] = farr[3] #buffArr[3] #записываем забойное давление, скорректированное на ссылочную глубину            
+            ResArr[nrate*V*j + nrate* Sbhp + n] = farr[3]        # записываем забойное давление, скорректированное на ссылочную глубину            
            
 
+            # wrvol    # Well volume rates and totals  float*4
             del farr[:]
             s = f
-            f = s + 3*mstr*4
-            farr.frombytes(line[s:f])
+            f = s + 3*mstr*nbf
+            farr.frombytes(line[s:f])   
             #print(farr)
-            ResArr[nrate*V*j + nrate* 0 + n] = farr[0] #buffArr[0] #записываем дебит нефти
-            if(wtype[j] == 1):  ResArr[nrate*V*j + nrate* 1 + n] = farr[2] #buffArr[2] # записываем дебит воды для добывающих или                        
-            elif(wtype[j]==-1): ResArr[nrate*V*j + nrate* 1 + n] = farr[1] #buffArr[1] # приемистость для нагнетательных  
-            
-            #for k in range(0,3):                  #wrvol        # Well volume rates and totals     float*4
-            #    del farr[:]
-            #    farr.frombytes(line[:mstr*4])     #wrvol   
-            #    if(k==0): 
-            #        ResArr[nrate*V*j + nrate* 0 + n] = farr[0] #buffArr[0] #записываем дебит нефти
-            #        if(wtype==1): ResArr[nrate*V*j + nrate* 1 + n] = farr[2] #buffArr[2] # записываем дебит воды для добывающих или                        
-            #        else:         ResArr[nrate*V*j + nrate* 1 + n] = farr[1] #buffArr[1] # приемистость для нагнетательных  
-                        
-#            line.seek(ncompt*3*floatSize,1)        #wrms         # Well molar rates and totals      float*4
-#            line.seek(NIWMCMP*mwzone*floatSize,1)            
-            #for k in range(NIWMCMP):              #wmcmp        # Miscellaneous completion data    float*4
-            #    file.seek(mwzone*floatSize,1)     #wmcmp
-#            file.seek(ncompt*mwzone*floatSize,1)            
-            #for k in range(0,ncompt):             #wrcmp        # Completion molar flow rates      float*4
-            #    file.seek(mwzone*floatSize,1)     #wrcmp
+            ResArr[nrate*V*j + nrate* Sopr + n] = farr[0]       # записываем дебит нефти
+            if(wtype[j] == 1): 
+                ResArr[nrate*V*j + nrate* Swpr + n] = farr[2]   # записываем дебит воды для добывающих или                        
+            elif(wtype[j]==-1):
+                ResArr[nrate*V*j + nrate* Swpr + n] = farr[1]   # приемистость для нагнетательных  
+           
 
-            #--- wvcmp # Completion volume flows float*4
+            # wrms         # Well molar rates and totals      float*4
+            #line.seek(ncompt*3*nbf,1)        
+            
+
+            # wmcmp        # Miscellaneous completion data    float*4
+            #line.seek(NIWMCMP*mwzone*nbf,1)            
+
+
+            # wrcmp        # Completion molar flow rates      float*4
+            #file.seek(ncompt*mwzone*nbf,1)            
+
+
+            # wvcmp        # Completion volume flows float*4
             if IWVCMP == 1:                       
                 del farr[:]
-                s = f + ncompt*3*4 + NIWMCMP*mwzone*4 + ncompt*mwzone*4
-                f = s + NIWVCMP*mwzone*4
+                s = f + ncompt*3*nbf + NIWMCMP*mwzone*nbf + ncompt*mwzone*nbf
+                f = s + NIWVCMP*mwzone*nbf
                 farr.frombytes(line[s:f])
                 for kk in range(0,mwzone): # итерация по слоям модели
                    if compArr[kk] !=0:
-                      ResArr[nrate*V*j + nrate*(6+compArr[kk]-1) + n] = farr[kk]  #записываем дебит нефти по перфорациям                   
-                      ResArr[nrate*V*j + nrate*(6+mwzone+compArr[kk]-1) + n] = farr[kk + 2*mwzone] #записываем дебит воды(приемистость) по перфорациям
+                      ResArr[nrate*V*j + nrate*(V+compArr[kk]-1) + n] = farr[kk]  # записываем дебит нефти по перфорациям                   
+                      ResArr[nrate*V*j + nrate*(V +mwzone+compArr[kk]-1) + n] = farr[kk + 2*mwzone] # записываем дебит воды(приемистость) по перфорациям
 
 
 
-#               for k in range(0,2):       
-#                   if(k==0): 
-#                      for kk in range(0,mwzone):  #итерация по cлоям модели
-#                         if compArr[kk] !=0:
-#                            ResArr[nrate*V*j + nrate*(6+compArr[kk]-1) + n] = farr[kk]  #записываем дебит нефти по перфорациям                   
-#                   if(k==2): 
-#                      for kk in range(0,mwzone):
-#                         if compArr[kk] !=0:
-#                            ResArr[nrate*V*j + nrate*(6+mwzone+compArr[kk]-1) + n] = farr[kk] #записываем дебит воды(приемистость) по перфорациям
-#
+           # wvlay  # Well layer volume flows float*4
 
-#            #---- wvlay  # Well layer volume flows float*4
-#            if IWVLAY == 1:                      
-#                for k in range(0,NIWVLAY):       
-#                    line.seek(mwzone*floatSize,1) 
+           #if IWVLAY == 1:                      
+           #     for k in range(0,NIWVLAY):       
+           #         line.seek(mwzone*floatSize,1) 
 
         #READ GROUP AND FIP DATA
-#        line.seek(mg*(1*intSize + leng*floatSize + NIGRVOL*nstr*floatSize + mw*floatSize + NIGVLAY*mwzone*floatSize ),1)
+        #line.seek(mg*(1*intSize + leng*floatSize + NIGRVOL*nstr*floatSize + mw*floatSize + NIGVLAY*mwzone*floatSize ),1)
         #for k in range(0,mg): 
         #    file.seek(1*intSize,1)             #sep          # separator flag                    int*4
         #    file.seek(leng*floatSize,1)        #gdata        # General group data               float*4    
@@ -258,22 +263,23 @@ def readRATE (file, nums=[], nrate = 0):
         #        file.seek(mwzone*floatSize,1)  #gvlay
 
         #READ AQUIFER DATA (IF ANY)
-#        line.seek(NAQUIF*NIRAQU*floatSize, 1)
+        #line.seek(NAQUIF*NIRAQU*floatSize, 1)
         #for k in range(0,NAQUIF): 
         #    file.seek(NIRAQU*floatSize, 1)    #aquifer    !!!!!not tested on model with aquifer, might be a source of errors!!!!!
 
         #READ QUANTITY DATA (дополнительные вектора, указанные в заголовке)
         del farr[:]
         s = mw*wlen + mg*glen + NAQUIF*aqlen 
-        f = s + nquant*4        
+        f = s + nquant*nbr        
         farr.frombytes(line[s:f]) #buffArr = getBinData(file,'float',nquant,)
         #print(farr)
         # считывание дополнительных массивов 
         for j in range(0,mw):
-            if(qoprh[j] > 0 ): ResArr[nrate*V*j + nrate*3 + n] = farr[qoprh[j]] #buffArr[qoprh[j]] #записываем исторические дебиты нефти если они есть                
-            if(qwprh[j] > 0 ): ResArr[nrate*V*j + nrate*4 + n] = farr[qwprh[j]] #buffArr[qwprh[j]] #записываем исторические дебиты воды  если они есть                
-            if(qwirh[j] > 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*4 + n] = farr[qwirh[j]] #buffArr[qwirh[j]]  #ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
-            if(qbhph[j] > 0 ): ResArr[nrate*V*j + nrate*5 + n] = farr[qbhph[j]] #buffArr[qbhph[j]]  #записываем исторические забойные давления если они есть                         
+            if(qoprh[j] > 0 ): ResArr[nrate*V*j + nrate*Hopr + n] = farr[qoprh[j]] # get history oil rates if any
+            if(qwprh[j] > 0 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwprh[j]] # get history water rates if any
+            if(qwirh[j] > 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
+            if(qbhph[j] > 0 ): ResArr[nrate*V*j + nrate*Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
+            if(qwefa[j] > 0 ): ResArr[nrate*V*j + nrate*Hwefa + n] = farr[qbhph[j]] # get history wefa if any 
             
         # возвращаем массив прочиатнных данных, повременная запись конвертирована в массив векторов
     #return Items
