@@ -81,6 +81,7 @@ def readRATE (file, nums=[], nrate = 0):
     nbf =  constants.NBFLOAT # number of bytes in float
     nbr =  constants.NBREAL # number of bytes in real
     V = constants.VEC + mwzone*2*IWVCMP # number of base vectors + number of layers* 2 (oil, water) if output by layers is present  
+    Vbase = constants.VEC
     #indexes of vectors
     Sopr  = constants.Sopr
     Swpr  = constants.Swpr 
@@ -128,6 +129,7 @@ def readRATE (file, nums=[], nrate = 0):
             if (HARR[i].mnem.strip() == "wwprh" and HARR[i].asname.strip() == WNAMES[j].strip()): qwprh[j] = i
             if (HARR[i].mnem.strip() == "wwirh" and HARR[i].asname.strip() == WNAMES[j].strip()): qwirh[j] = i                   
             if (HARR[i].mnem.strip() == "wbhph" and HARR[i].asname.strip() == WNAMES[j].strip()): qbhph[j] = i              
+            if (HARR[i].mnem.strip() == "wefa"  and HARR[i].asname.strip() == WNAMES[j].strip()): qwefa[j] = i              
             #if(HARR[i].mnem.strip() == "wwirh"  and HARR[i].asname.strip() == WNAMES[j].strip()):
             #    print(HARR[i].mnem.strip() + " |" + HARR[i].asname.strip()+ "| "+ str(i) + " "+ str(j)+" |" +WNAMES[j].strip()+"| ")
 
@@ -136,8 +138,9 @@ def readRATE (file, nums=[], nrate = 0):
         #print(j, qoprh[j])      
         #print(j, qwprh[j])
         #print(j, qbhph[j])
+        #print(j, qwefa[j])
         
-    #print(qoprh, qwprh, qbhph)
+    #print(qoprh, qwprh, qbhph, qwefa)
         #print(HARR[j].ASIND)
         #print(HARR[j].ASDEPTH)
         #HARR[j].printRatesHeader() #debug output                
@@ -240,8 +243,8 @@ def readRATE (file, nums=[], nrate = 0):
                 farr.frombytes(line[s:f])
                 for kk in range(0,mwzone): # итерация по слоям модели
                    if compArr[kk] !=0:
-                      ResArr[nrate*V*j + nrate*(V+compArr[kk]-1) + n] = farr[kk]  # записываем дебит нефти по перфорациям                   
-                      ResArr[nrate*V*j + nrate*(V +mwzone+compArr[kk]-1) + n] = farr[kk + 2*mwzone] # записываем дебит воды(приемистость) по перфорациям
+                      ResArr[nrate*V*j + nrate*(Vbase + compArr[kk]-1) + n] = farr[kk]  # записываем дебит нефти по перфорациям                   
+                      ResArr[nrate*V*j + nrate*(Vbase + mwzone + compArr[kk] - 1) + n] = farr[kk + 2*mwzone] # записываем дебит воды(приемистость) по перфорациям
 
 
 
@@ -279,7 +282,7 @@ def readRATE (file, nums=[], nrate = 0):
             if(qwprh[j] > 0 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwprh[j]] # get history water rates if any
             if(qwirh[j] > 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
             if(qbhph[j] > 0 ): ResArr[nrate*V*j + nrate*Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
-            if(qwefa[j] > 0 ): ResArr[nrate*V*j + nrate*Hwefa + n] = farr[qbhph[j]] # get history wefa if any 
+            if(qwefa[j] > 0 ): ResArr[nrate*V*j + nrate*Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
             
         # возвращаем массив прочиатнных данных, повременная запись конвертирована в массив векторов
     #return Items

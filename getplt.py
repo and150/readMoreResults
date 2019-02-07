@@ -42,7 +42,7 @@ def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
     MZ = numsArray[5-1] # количество слоев в скважинах (кол-во ячеек по вертикали, нужно сюда передавать параметр
     T = len(times) # количество записей RATE
     W = len(wellNames) # количество скважин
-    V = constants.VEC + MZ*2*numsArray[55-1]       # количество векторов 
+    V = constants.VEC + MZ*2*numsArray[55-1]       # vectors amount 
 
     # чтение списка PLT
     PLTlist = []       
@@ -71,7 +71,7 @@ def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
                 pltarr = [0]*MZ 
                 for k in range(0,MZ):
                     #print("{:.3f}".format(ResArr[T*V*j + T*(6+k) + i] + ResArr[T*V*j + T*(6+MZ+k) + i]), end=" ")     # жидкость  6 - количество скважинных векторов, MZ- количество соединений
-                    pltarr[k] = ResArr[T*V*j + T*(6+k) + i] + ResArr[T*V*j + T*(6+MZ+k) + i] # генерация временного вектора PLT на каждый временной шаг для каждой скважины
+                    pltarr[k] = ResArr[T*V*j + T*(V+k) + i] + ResArr[T*V*j + T*(V+MZ+k) + i] # генерация временного вектора PLT на каждый временной шаг для каждой скважины
                 #вывод на консоль
                 #print(pltarr)
                 #print(sum(pltarr[0:4]), sum(pltarr[4:7]) ,sum(pltarr[7:10]), end = " ") # вывод суммы по пачкам (индексы надо ВРУЧНУЮ проставить...)

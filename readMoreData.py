@@ -13,6 +13,7 @@ from readrate import readRATE
 
 import getwt
 import getplt
+import getcpt
 from printrate import printRate
 
 
@@ -47,7 +48,7 @@ def readMore(currDir, rootName): # read MORE result files
 #currDir = os.getcwd()
 
 parser = argparse.ArgumentParser()
-parser.add_argument("inputfile", help="provides a name of results file to read")
+parser.add_argument("inputfile", help="provides a name of *.mis file to read")
 parser.add_argument("-w","--WT", action="store_true", help ="generates well tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
 parser.add_argument("-c","--CPT", action="store_true", help ="generates crossplots by certain date")
