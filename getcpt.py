@@ -2,6 +2,7 @@ import constants as cst
 import datetime
 import time
 from datescompare import date2days
+from printrate import printRate
 
 def getCPT(currDir, rootName, startDate, times, numsArray, RateOut):
     ResArr = RateOut[0]
@@ -31,16 +32,8 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut):
 
     #t0 = date2days("01.10.2018 00:00:00", startDate)
     #t1 = date2days("01.11.2018 00:00:00", startDate)
+    printRate(times, numsArray, RateOut)
 
-    #for i in range(0,len(times)):
-    #    if(times[i] == t0): i0 = i
-    #    if(times[i] == t1): i1 = i
-
-
-
-    #for w in wellNames:
-    #    j = (wellNames.index(w.wellNames))
-    #print(ResArr)
 
 
 

@@ -217,10 +217,13 @@ def readRATE (file, nums=[], nrate = 0):
             farr.frombytes(line[s:f])   
             #print(farr)
             ResArr[nrate*V*j + nrate* Sopr + n] = farr[0]       # записываем дебит нефти
+            ResArr[nrate*V*j + nrate* Sopt + n] = farr[5]   # записываем накопленную нефть для добывающих
+            ResArr[nrate*V*j + nrate* Swpt + n] = farr[7]   # записываем накопленную воду  для добывающих
             if(wtype[j] == 1): 
-                ResArr[nrate*V*j + nrate* Swpr + n] = farr[2]   # записываем дебит воды для добывающих или                        
+                ResArr[nrate*V*j + nrate* Swpr + n] = farr[2]   # записываем дебит воды для добывающих
             elif(wtype[j]==-1):
                 ResArr[nrate*V*j + nrate* Swpr + n] = farr[1]   # приемистость для нагнетательных  
+                ResArr[nrate*V*j + nrate* Swit + n] = farr[11]   # записываем накопленную закачку для нагнетательных 
            
 
             # wrms         # Well molar rates and totals      float*4
