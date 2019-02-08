@@ -1,4 +1,4 @@
-import constants
+import constants as cts
 import datetime
 import time
 from datescompare import *
@@ -44,26 +44,13 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
 
     #### поиск индекса скважины в массиве Item
     tr = 0
-    timetol = constants.TIMETOL
-    liqCut = constants.LIQCUT
+    timetol = cts.TIMETOL
+    liqCut = cts.LIQCUT
     PBUstr = ""
     T = len(times) # количество записей RATE
     W = len(wellNames) # количество скважин
     MZ = numsArray[5-1] # количество слоев в скважинах (кол-во ячеек по вертикали, нужно сюда передавать параметр
-    V = constants.VEC + MZ*2*numsArray[55-1]       # количество векторов 
-    # vectors indexes
-    Sopr  = constants.Sopr
-    Swpr  = constants.Swpr 
-    Sbhp  = constants.Sbhp
-                 
-    Sopt  = constants.Sopt  
-    Swpt  = constants.Swpt  
-    Swit  = constants.Swit  
-
-    Hopr  = constants.Hopr  
-    Hwpr  = constants.Hwpr  
-    Hbhp  = constants.Hbhp  
-    Hwefa = constants.Hwefa 
+    V = cts.VEC + MZ*2*numsArray[55-1]       # количество векторов 
 
 
     for x in WTlist: # для всех скважино-испытаний в списке
@@ -73,30 +60,30 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
             #вывод показателей только в интервале испытаний
             if(times[i]>= x.start and times[i]<= x.stop):             
             #if(x.start - times[i] < timetol and times[i] - x.stop < timetol):                
-                #вывод всех показателей по испытаниям скважин в файл *.results  без фильтрации 
+                #вывод всех показателей по испытаниям скважин в файл *.WTgraphs  без фильтрации 
                 outFile.write("\n")
                 outFile.write("WT=" + str(x.wt)+ " ")                            #вывод номера испытания
                 outStr = str(times[i]) +" " + str(wellNames[wi]+" "); outFile.write(outStr) # вывод времени и номера скважины                              
 
-                outFile.write(str(ResArr[T*V*wi + T* Sbhp + i])); outFile.write(" ")  # вывод расчетного забойного давления                
-                outFile.write(str(ResArr[T*V*wi + T* Sopr + i])); outFile.write(" ")  # вывод расчетного дебита нефти                
-                outFile.write(str(ResArr[T*V*wi + T* Swpr + i])); outFile.write(" ")  # вывод расчетного дебита воды                
+                outFile.write(str(ResArr[T*V*wi + T* cts.Sbhp + i])); outFile.write(" ")  # вывод расчетного забойного давления                
+                outFile.write(str(ResArr[T*V*wi + T* cts.Sopr + i])); outFile.write(" ")  # вывод расчетного дебита нефти                
+                outFile.write(str(ResArr[T*V*wi + T* cts.Swpr + i] + ResArr[T*V*wi + T* cts.Swir + i])); outFile.write(" ")  # вывод расчетного дебита воды + закачка
 
-                outFile.write(str(ResArr[T*V*wi + T* Hbhp + i])); outFile.write(" ")  # вывод фактического забойного давления                
-                outFile.write(str(ResArr[T*V*wi + T* Hopr + i])); outFile.write(" ")  # вывод фактического дебита нефти                
-                outFile.write(str(ResArr[T*V*wi + T* Hwpr + i])); outFile.write(" ")  # вывод фактического дебита воды
+                outFile.write(str(ResArr[T*V*wi + T* cts.Hbhp + i])); outFile.write(" ")  # вывод фактического забойного давления                
+                outFile.write(str(ResArr[T*V*wi + T* cts.Hopr + i])); outFile.write(" ")  # вывод фактического дебита нефти                
+                outFile.write(str(ResArr[T*V*wi + T* cts.Hwpr + i] + ResArr[T*V*wi + T* cts.Hwir + i])); outFile.write(" ")  # вывод фактического дебита воды + закачка
                 
 
 
                 #поиск PBU и вытаскивание параметров для вывода в отдельную таблицу *.WTout
                 # расчет дебитов жидкости в интервале PBU    
-                currLiq  = ResArr[T*V*wi + T* Sopr + i] + ResArr[T*V*wi + T* Swpr + i] # текущий расчетный дебит жидкости
-                currLiqH = ResArr[T*V*wi + T* Hopr + i] + ResArr[T*V*wi + T* Hwpr + i] # текущий фактический дебит жидкости
+                currLiq  = ResArr[T*V*wi + T* cts.Sopr + i] + ResArr[T*V*wi + T* cts.Swpr + i] + ResArr[T*V*wi + T* cts.Swir + i]# текущий расчетный дебит жидкости
+                currLiqH = ResArr[T*V*wi + T* cts.Hopr + i] + ResArr[T*V*wi + T* cts.Hwpr + i] + ResArr[T*V*wi + T* cts.Hwir + i]# текущий фактический дебит жидкости
 
 
-                currP  = ResArr[T*V*wi + T* Sbhp + i]   #расчетное давление 
-                currPH = ResArr[T*V*wi + T* Hbhp + i]   #фактическое давление 
-                if currP <= constants.PTOL or currPH <= constants.PTOL :
+                currP  = ResArr[T*V*wi + T* cts.Sbhp + i]   #расчетное давление 
+                currPH = ResArr[T*V*wi + T* cts.Hbhp + i]   #фактическое давление 
+                if currP <= cts.PTOL or currPH <= cts.PTOL :
                     maxP = maxP
                     maxPH = maxPH
                 else:
@@ -104,7 +91,7 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                     maxPH = currPH
 
 
-                if i<=len(times):  nextLiq = ResArr[T*V*wi + T* Sopr + i+1] + ResArr[T*V*wi + T* Swpr + i+1] # следующий расчетный дебит жидкости                   
+                if i<=len(times):  nextLiq = ResArr[T*V*wi + T* cts.Sopr + i+1] + ResArr[T*V*wi + T* cts.Swpr + i+1]+ ResArr[T*V*wi + T* cts.Swir + i+1] # следующий расчетный дебит жидкости                   
                 else: nextLiq = currLiq
     
                 if(currLiq > liqCut):   # проверка интервалов с ненулевым дебитом 
@@ -112,13 +99,13 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                     if(nextLiq <= liqCut):                          
                         PBUstr = PBUstr + x.well + " " + str(times[i]) #имя скважины и время начала КВД
                         PBUstr = PBUstr + " " + str(currLiq) + " " + str(currLiqH) # расчетный и фактический дебит(приемистость) жидкости
-                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* Sbhp + i]) #расчетное забойное 
-                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* Hbhp + i])  #фактическое забойное
+                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Sbhp + i]) #расчетное забойное 
+                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Hbhp + i])  #фактическое забойное
                 else:
                     outFile.write(" static")                    
                     if(nextLiq > liqCut): 
-                        #PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* Sbhp + i])   #расчетное пластовое
-                        #PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* Hbhp + i])   #фактическое пластовое
+                        #PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Sbhp + i])   #расчетное пластовое
+                        #PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Hbhp + i])   #фактическое пластовое
                         #PBUstr = PBUstr + " " + str(maxP)   #расчетное пластовое
                         #PBUstr = PBUstr + " " + str(maxPH)   #фактическое пластовое
                         #PBUstr = PBUstr + " " + str(times[i])  # время окончания КВД                       

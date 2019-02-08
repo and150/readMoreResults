@@ -1,7 +1,7 @@
 import array
 import struct
 from getbindata import getBinData
-import constants
+import constants as cts
  
 def readRATE (file, nums=[], nrate = 0):
     # nums[] - массив адресов показателей
@@ -77,26 +77,11 @@ def readRATE (file, nums=[], nrate = 0):
     #######################################################
 
     #READ HEADER DATA
-    nbi =  constants.NBINT # number of bytes in integer
-    nbf =  constants.NBFLOAT # number of bytes in float
-    nbr =  constants.NBREAL # number of bytes in real
-    V = constants.VEC + mwzone*2*IWVCMP # number of base vectors + number of layers* 2 (oil, water) if output by layers is present  
-    Vbase = constants.VEC
-    #indexes of vectors
-    Sopr  = constants.Sopr
-    Swpr  = constants.Swpr 
-    Sbhp  = constants.Sbhp
-                 
-    Sopt  = constants.Sopt  
-    Swpt  = constants.Swpt  
-    Swit  = constants.Swit  
-
-    Hopr  = constants.Hopr  
-    Hwpr  = constants.Hwpr  
-    Hbhp  = constants.Hbhp  
-    Hwefa = constants.Hwefa 
-
-
+    nbi =  cts.NBINT # number of bytes in integer
+    nbf =  cts.NBFLOAT # number of bytes in float
+    nbr =  cts.NBREAL # number of bytes in real
+    V = cts.VEC + mwzone*2*IWVCMP # number of base vectors + number of layers* 2 (oil, water) if output by layers is present  
+    Vbase = cts.VEC
 
 
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
@@ -206,7 +191,7 @@ def readRATE (file, nums=[], nrate = 0):
             f = s + NIWRATE*nbf
             farr.frombytes(line[s:f])      
             #print(farr)
-            ResArr[nrate*V*j + nrate* Sbhp + n] = farr[3]        # записываем забойное давление, скорректированное на ссылочную глубину            
+            ResArr[nrate*V*j + nrate* cts.Sbhp + n] = farr[3]        # записываем забойное давление, скорректированное на ссылочную глубину            
            
 
             # wrvol    # Well volume rates and totals  float*4
@@ -215,14 +200,14 @@ def readRATE (file, nums=[], nrate = 0):
             f = s + 3*mstr*nbf
             farr.frombytes(line[s:f])   
             #print(farr)
-            ResArr[nrate*V*j + nrate* Sopr + n] = farr[0]       # записываем дебит нефти
-            ResArr[nrate*V*j + nrate* Sopt + n] = farr[5]   # записываем накопленную нефть для добывающих
-            ResArr[nrate*V*j + nrate* Swpt + n] = farr[7]   # записываем накопленную воду  для добывающих
+            ResArr[nrate*V*j + nrate* cts.Sopr + n] = farr[0]   # записываем дебит нефти
+            ResArr[nrate*V*j + nrate* cts.Sopt + n] = farr[5]   # записываем накопленную нефть для добывающих
+            ResArr[nrate*V*j + nrate* cts.Swpt + n] = farr[7]   # записываем накопленную воду  для добывающих
             if(wtype[j] == 1): 
-                ResArr[nrate*V*j + nrate* Swpr + n] = farr[2]   # записываем дебит воды для добывающих
+                ResArr[nrate*V*j + nrate* cts.Swpr + n] = farr[2]   # записываем дебит воды для добывающих
             elif(wtype[j]==-1):
-                ResArr[nrate*V*j + nrate* Swpr + n] = farr[1]   # приемистость для нагнетательных  
-                ResArr[nrate*V*j + nrate* Swit + n] = farr[11]   # записываем накопленную закачку для нагнетательных 
+                ResArr[nrate*V*j + nrate* cts.Swir + n] = farr[1]   # приемистость для нагнетательных  
+                ResArr[nrate*V*j + nrate* cts.Swit + n] = farr[11]   # записываем накопленную закачку для нагнетательных 
            
 
             # wrms         # Well molar rates and totals      float*4
@@ -280,11 +265,11 @@ def readRATE (file, nums=[], nrate = 0):
         #print(farr)
         # считывание дополнительных массивов 
         for j in range(0,mw):
-            if(qoprh[j] >= 0 ): ResArr[nrate*V*j + nrate*Hopr + n] = farr[qoprh[j]] # get history oil rates if any
-            if(qwprh[j] >= 0 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwprh[j]] # get history water rates if any
-            if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
-            if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
-            if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
+            if(qoprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hopr + n] = farr[qoprh[j]] # get history oil rates if any
+            if(qwprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwpr + n] = farr[qwprh[j]] # get history water rates if any
+            if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*cts.Hwir + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
+            if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
+            if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
             
         # возвращаем массив прочиатнных данных, повременная запись конвертирована в массив векторов
     #return Items

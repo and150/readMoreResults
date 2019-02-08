@@ -1,4 +1,4 @@
-import constants as cst
+import constants as cts
 import datetime
 import time
 from datescompare import date2days
@@ -14,21 +14,7 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut):
     T = len(times) # количество записей RATE
     W = len(wellNames) # количество скважин
     MZ = numsArray[5-1] # количество слоев в скважинах (кол-во ячеек по вертикали, нужно сюда передавать параметр
-    V = cst.VEC + MZ*2*numsArray[55-1]       # количество векторов 
-    #indexes of vectors
-    Sopr  = cst.Sopr
-    Swpr  = cst.Swpr 
-    Sbhp  = cst.Sbhp
-            
-    Sopt  = cst.Sopt  
-    Swpt  = cst.Swpt  
-    Swit  = cst.Swit  
-
-    Hopr  = cst.Hopr  
-    Hwpr  = cst.Hwpr  
-    Hbhp  = cst.Hbhp  
-    Hwefa = cst.Hwefa 
-
+    V = cts.VEC + MZ*2*numsArray[55-1]       # количество векторов 
 
     #t0 = date2days("01.10.2018 00:00:00", startDate)
     #t1 = date2days("01.11.2018 00:00:00", startDate)
