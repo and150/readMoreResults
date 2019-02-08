@@ -48,7 +48,10 @@ def readCTL(file):
     times = []        
     for i in range(0,len(ARR)):    #counts number of rate records
         rateNum+=ARR[i].wfr    
-        if ARR[i].wfr == 1:  times.append(ARR[i].tos)
+        if ARR[i].wfr == 1:  
+            times.append(ARR[i])
+            # debug output
+            #print(ARR[i].tsn, ARR[i].wfa, ARR[i].wfr, ARR[i].tos, ARR[i].stl, ARR[i].plns, )
     
     return times
 

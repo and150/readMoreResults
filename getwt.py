@@ -58,12 +58,12 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
         wi = (wellNames.index(x.well))     
         for i in range(0,T): # для всех временных записей RATE файла
             #вывод показателей только в интервале испытаний
-            if(times[i]>= x.start and times[i]<= x.stop):             
-            #if(x.start - times[i] < timetol and times[i] - x.stop < timetol):                
+            if(times[i].tos >= x.start and times[i].tos <= x.stop):             
+            #if(x.start - times[i].tos < timetol and times[i].tos - x.stop < timetol):                
                 #вывод всех показателей по испытаниям скважин в файл *.WTgraphs  без фильтрации 
                 outFile.write("\n")
                 outFile.write("WT=" + str(x.wt)+ " ")                            #вывод номера испытания
-                outStr = str(times[i]) +" " + str(wellNames[wi]+" "); outFile.write(outStr) # вывод времени и номера скважины                              
+                outStr = str(times[i].tos) +" " + str(wellNames[wi]+" "); outFile.write(outStr) # вывод времени и номера скважины                              
 
                 outFile.write(str(ResArr[T*V*wi + T* cts.Sbhp + i])); outFile.write(" ")  # вывод расчетного забойного давления                
                 outFile.write(str(ResArr[T*V*wi + T* cts.Sopr + i])); outFile.write(" ")  # вывод расчетного дебита нефти                
@@ -97,7 +97,7 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                 if(currLiq > liqCut):   # проверка интервалов с ненулевым дебитом 
                     outFile.write(" dynamic") 
                     if(nextLiq <= liqCut):                          
-                        PBUstr = PBUstr + x.well + " " + str(times[i]) #имя скважины и время начала КВД
+                        PBUstr = PBUstr + x.well + " " + str(times[i].tos) #имя скважины и время начала КВД
                         PBUstr = PBUstr + " " + str(currLiq) + " " + str(currLiqH) # расчетный и фактический дебит(приемистость) жидкости
                         PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Sbhp + i]) #расчетное забойное 
                         PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Hbhp + i])  #фактическое забойное
@@ -108,12 +108,12 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                         #PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Hbhp + i])   #фактическое пластовое
                         #PBUstr = PBUstr + " " + str(maxP)   #расчетное пластовое
                         #PBUstr = PBUstr + " " + str(maxPH)   #фактическое пластовое
-                        #PBUstr = PBUstr + " " + str(times[i])  # время окончания КВД                       
+                        #PBUstr = PBUstr + " " + str(times[i].tos)  # время окончания КВД                       
                         break # прерывает цикл после прочтения ПЕРВОЙ КВД для скважины!
         #print(str(x.wt)," ", PBUstr) # вывод параметров PBU в консоль
         PBUstr = PBUstr + " " + str(maxP)   #расчетное пластовое
         PBUstr = PBUstr + " " + str(maxPH)   #фактическое пластовое
-        PBUstr = PBUstr + " " + str(times[i])  # время окончания КВД                       
+        PBUstr = PBUstr + " " + str(times[i].tos)  # время окончания КВД                       
 
         wtOutFile.write("WT="+str(x.wt)+" "+PBUstr+"\n") #вывод параметров PBU в файл        
     outFile.close()

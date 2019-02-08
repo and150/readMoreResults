@@ -34,7 +34,7 @@ def readMore(currDir, rootName): # read MORE result files
 
     # RATE
     with open(currDir+"\\"+rootName+".rat", "r+b") as file:  
-	    RateOut = readRATE(file, numsArray, len(times)) 
+	    RateOut = readRATE(file, numsArray, times) 
     return(startDate, times, numsArray, RateOut)
 
 

@@ -3,7 +3,7 @@ import struct
 from getbindata import getBinData
 import constants as cts
  
-def readRATE (file, nums=[], nrate = 0):
+def readRATE (file, nums=[], times=[]):
     # nums[] - массив адресов показателей
     # nrate - количество временных шагов в файле rat
 
@@ -84,6 +84,7 @@ def readRATE (file, nums=[], nrate = 0):
     Vbase = cts.VEC
 
 
+    nrate = len(times)
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
 
     WNAMES = getBinData(file,'char16',mw,) #Well names   
@@ -270,6 +271,17 @@ def readRATE (file, nums=[], nrate = 0):
             if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*cts.Hwir + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
             if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
             if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
+            # расчет исторических накопленных показателей
+            if(n==0):
+                ResArr[nrate*V*j + nrate*cts.Hopt + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hopr + n] * times[n].tos / 1000
+                ResArr[nrate*V*j + nrate*cts.Hwpt + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hwpr + n] * times[n].tos / 1000
+                ResArr[nrate*V*j + nrate*cts.Hwit + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hwir + n] * times[n].tos / 1000
+            else:
+                ResArr[nrate*V*j + nrate*cts.Hopt + n] = ResArr[nrate*V*j + nrate*cts.Hopt + n-1] + ResArr[nrate*V*j + nrate*cts.Hopr + n] * (times[n].tos - times[n-1].tos )/ 1000
+                ResArr[nrate*V*j + nrate*cts.Hwpt + n] = ResArr[nrate*V*j + nrate*cts.Hwpt + n-1] + ResArr[nrate*V*j + nrate*cts.Hwpr + n] * (times[n].tos - times[n-1].tos )/ 1000
+                ResArr[nrate*V*j + nrate*cts.Hwit + n] = ResArr[nrate*V*j + nrate*cts.Hwit + n-1] + ResArr[nrate*V*j + nrate*cts.Hwir + n] * (times[n].tos - times[n-1].tos )/ 1000
+
+
             
         # возвращаем массив прочиатнных данных, повременная запись конвертирована в массив векторов
     #return Items
