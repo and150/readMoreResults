@@ -130,8 +130,7 @@ def readRATE (file, nums=[], nrate = 0):
             if (HARR[i].mnem.strip() == "wwirh" and HARR[i].asname.strip() == WNAMES[j].strip()): qwirh[j] = i                   
             if (HARR[i].mnem.strip() == "wbhph" and HARR[i].asname.strip() == WNAMES[j].strip()): qbhph[j] = i              
             if (HARR[i].mnem.strip() == "wefa"  and HARR[i].asname.strip() == WNAMES[j].strip()): qwefa[j] = i              
-            #if(HARR[i].mnem.strip() == "wwirh"  and HARR[i].asname.strip() == WNAMES[j].strip()):
-            #    print(HARR[i].mnem.strip() + " |" + HARR[i].asname.strip()+ "| "+ str(i) + " "+ str(j)+" |" +WNAMES[j].strip()+"| ")
+            #print(HARR[i].mnem.strip() + " |" + HARR[i].asname.strip()+ "| "+ str(i) + " "+ str(j)+" |" +WNAMES[j].strip()+"| ")
 
     #### debug print ####
     #for j in range(0,mw):  # debug ouput
@@ -281,11 +280,11 @@ def readRATE (file, nums=[], nrate = 0):
         #print(farr)
         # считывание дополнительных массивов 
         for j in range(0,mw):
-            if(qoprh[j] > 0 ): ResArr[nrate*V*j + nrate*Hopr + n] = farr[qoprh[j]] # get history oil rates if any
-            if(qwprh[j] > 0 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwprh[j]] # get history water rates if any
-            if(qwirh[j] > 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
-            if(qbhph[j] > 0 ): ResArr[nrate*V*j + nrate*Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
-            if(qwefa[j] > 0 ): ResArr[nrate*V*j + nrate*Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
+            if(qoprh[j] >= 0 ): ResArr[nrate*V*j + nrate*Hopr + n] = farr[qoprh[j]] # get history oil rates if any
+            if(qwprh[j] >= 0 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwprh[j]] # get history water rates if any
+            if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*Hwpr + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
+            if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
+            if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
             
         # возвращаем массив прочиатнных данных, повременная запись конвертирована в массив векторов
     #return Items
