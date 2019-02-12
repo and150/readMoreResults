@@ -16,5 +16,3 @@ def date2days(sdate="31.12.2001 00:00:00", sDate = []):
     time =   time.days + time.seconds/60/60/24 # перевод временного интервала в дни
     return time
 
-
-
