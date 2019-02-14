@@ -51,7 +51,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("inputfile", help="provides a name of *.mis file to read")
 parser.add_argument("-w","--WT", action="store_true", help ="generates well tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
-parser.add_argument("-c","--CPT", action="store_true", help ="generates crossplots by certain date")
+parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
 args = parser.parse_args()
 
 currDir = os.path.dirname( os.path.abspath(args.inputfile))
@@ -72,9 +72,9 @@ try:
     numsArray = out[2]
     RateOut = out[3]
 
-    if args.CPT:
+    if args.CPT!="-999":
         # выгрузка кроссплотов 
-        getcpt.getCPT(currDir, rootName, startDate, times, numsArray, RateOut)      
+        getcpt.getCPT(currDir, rootName, startDate, times, numsArray, RateOut, args.CPT)      
 
     if args.WT:
         # выгрузка показателей по ГДИ
