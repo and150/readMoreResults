@@ -284,6 +284,7 @@ def readRATE (file, nums=[], times=[]):
             
         # возвращаем массив прочиатнных данных, повременная запись конвертирована в массив векторов
     #return Items
+    file.close()
     return (ResArr, WNAMES)
 
 

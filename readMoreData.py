@@ -38,8 +38,6 @@ def readMore(currDir, rootName): # read MORE result files
     return(startDate, times, numsArray, RateOut)
 
 
-
-
   
 # функция профилирования для оценки быстродействия
 #pr = cProfile.Profile()
