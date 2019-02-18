@@ -154,7 +154,6 @@ def readRATE (file, nums=[], times=[]):
        
         # чтение записи для одного временного шага
         line = file.read(totlen )
-        #print(struct.unpack('i'*tt,line)) # debug output
 
         #if n%50==0:
         #    print("STEP ",n)     # debug output                      

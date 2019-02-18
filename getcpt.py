@@ -6,22 +6,21 @@ from datescompare import date2days
 from printrate import printRate
 
 
-def printCptByDate(ResArr, times, T, V,  x, wi,  cptDate, i):
-    print('{0:s} {1:5.2f} '.format(cptDate, times[i].tos), end = ' ' )  # вывод даты и времени шага
-    print('{0:s}'.format(x), end = ' ') # вывод имени скважины
+def printCptByDate(ResArr, times, T, V,  x, wi,  cptDate, i, outFile):
+    outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[i].tos))  # вывод даты и времени шага
+    outFile.write('{0:s} '.format(x) ) # вывод имени скважины
     
-    print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Sopt + i]), end = ' ')  # вывод расчетной накопленной добычи нефти
-    print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Hopt + i]), end = ' ')  # вывод фактической накопленной добычи нефти
-    
-    print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swit + i]), end = ' ')  # вывод расчетной накопленной закачки 
-    print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwit + i]), end = ' ')  # вывод фактической накопленной закачки 
-    
-    print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swpt + i]), end = ' ')  # вывод расчетной накопленной добычи воды 
-    print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwpt + i]), end = ' ')  # вывод фактической накопленной добычи воды 
-    
-    print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Sbhp + i]), end = ' ')  # вывод расчетного забойного давления                
-    print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hbhp + i]), end = ' ')  # вывод фактического забойного давления                
- 
+    outFile.write('{0:3f} '.format(ResArr[T*V*wi + T*cts.Sopt + i]) )  # вывод расчетной накопленной добычи нефти
+    outFile.write('{0:3f} '.format(ResArr[T*V*wi + T*cts.Hopt + i]) )  # вывод фактической накопленной добычи нефти
+
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Swit + i]) )  # вывод расчетной накопленной закачки 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Hwit + i]) )  # вывод фактической накопленной закачки 
+
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Swpt + i]) )  # вывод расчетной накопленной добычи воды 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Hwpt + i]) )  # вывод фактической накопленной добычи воды 
+
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Sbhp + i]) )  # вывод расчетного забойного давления                
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Hbhp + i]) )  # вывод фактического забойного давления                
 
 
 # function gets date-time and returns timestep number or -1 if date-time not found
@@ -61,22 +60,28 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
 
 
     # get date one (or more) month behind, number of months set in constants
-    cptDate1 = datetime.datetime.strptime(cptDate, "%d.%m.%Y %H:%M:%S") - relativedelta(month = cts.MONTHDELTA)
+    cptDate1 = datetime.datetime.strptime(cptDate, "%d.%m.%Y %H:%M:%S")
+    cptDate1 = cptDate1 - relativedelta(months = 1)
     cptDate1 = cptDate1.strftime("%d.%m.%Y %H:%M:%S")
+    #print(cptDate, cptDate1)
 
     # get timestep number for crossplot date and previous date
     i = getTimeStepNumber(times, startDate, cptDate)
     j = getTimeStepNumber(times, startDate, cptDate1)
 
+
     if(i>=0 and j>=0):
         for x in wellNames:
             wi = (wellNames.index(x))
-            printCptByDate(ResArr, times, T, V, x, wi, cptDate, i)
-            printCptByDate(ResArr, times, T, V, x, wi, cptDate1, j)
-            print()
+            printCptByDate(ResArr, times, T, V, x, wi, cptDate, i, cptOutFile)
+            printCptByDate(ResArr, times, T, V, x, wi, cptDate1, j, cptOutFile)
+            cptOutFile.write('\n') # переход на новую строку
+            #print()
     else:
         print("{0:s} - no such date".format(cptDate))
 
+
+    cptOutFile.close()
 
 
 #   # debug part
