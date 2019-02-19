@@ -16,3 +16,7 @@ def date2days(sdate="31.12.2001 00:00:00", sDate = []):
     time =   time.days + time.seconds/60/60/24 # перевод временного интервала в дни
     return time
 
+
+def days2date( elapsedTime , sDate = []):
+    initTime = datetime.datetime.strptime(str(sDate[2])+"-"+str(sDate[1])+"-"+str(sDate[0]),"%Y-%m-%d")  # конвертация стартовой даты из массива во время   
+    return  initTime + datetime.timedelta(elapsedTime)
