@@ -32,11 +32,11 @@ def printPlt(pltItem, pltarr, pltLR, times, wellNames, tstep, wnumb, pltOutFile)
     s = 0
     f = s
     for i in range(0, len(pltItem.pltInts)):
-        f = int(pltItem.pltInts[i])-1
+        f = int(pltItem.pltInts[i])
 
         pltOutFile.write( '{:.3f} '.format(sum(pltarr[s:f])/pltLR ))                    
         #print( '{:.3f} '.format(sum(pltarr[s:f])/pltLR ), end = '') # console output
-        print( '|{:d} {:d}| '.format(s,f ), end = '') # debug console output
+        #print( '|{:d} {:d}| '.format(s,f ), end = '') # debug console output
         s = f
 
     pltOutFile.write('\n')
@@ -96,24 +96,7 @@ def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
                 if pltLR != 0: 
                     printPlt(x, pltarr, pltLR, times, wellNames, i , j, pltOutFile)
 
-                ##   pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f}\n'.format(times[i].tos, wellNames[j], sum(pltarr[0:4])/pltLR, sum(pltarr[4:7])/pltLR, sum(pltarr[7:10])/pltLR) )                    
-                 # if wellNames[j] == 'WQ2-197':
-                 #     pltOutFile.write( '{} {} {:.3f} {:.3f} - - - \n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:46])/pltLR, sum(pltarr[46:89])/pltLR )  )                  
-                 # elif  wellNames[j]== 'WQ2-246':
-                 #     pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f} - - \n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:40])/pltLR, sum(pltarr[40:68])/pltLR, sum(pltarr[68:89])/pltLR )  )                  
-                 # elif  wellNames[j]== 'WQ2-75':
-                 #     pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f} - - \n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:40])/pltLR, sum(pltarr[40:66])/pltLR, sum(pltarr[66:89])/pltLR )  )                  
-                 # elif  wellNames[j]== 'WQ2-267':
-                 #     pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f} - - \n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:44])/pltLR, sum(pltarr[45:53])/pltLR, sum(pltarr[54:89])/pltLR )  )                  
-                 # elif  wellNames[j]== 'WQ2-189':
-                 #     pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f} {:.3f} - \n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:39])/pltLR, sum(pltarr[39:54])/pltLR, sum(pltarr[54:75])/pltLR , sum(pltarr[75:89])/pltLR)  )                  
-                 # elif  wellNames[j]== 'WQ2-20':
-                 #     pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f} {:.3f} - \n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:32])/pltLR, sum(pltarr[32:61])/pltLR, sum(pltarr[61:73])/pltLR , sum(pltarr[73:89])/pltLR)  )                  
-                 # else:                	
-                 #     #pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f}\n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:34])/pltLR, sum(pltarr[34:56])/pltLR, sum(pltarr[56:66])/pltLR, sum(pltarr[66:75])/pltLR, sum(pltarr[75:89])/pltLR  ) )                    
-                 #     pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f}\n'.format( times[i].tos, wellNames[j],  sum(pltarr[0:1])/pltLR, sum(pltarr[1:2])/pltLR, sum(pltarr[2:3])/pltLR ))                    
                 else:
-                	#pltOutFile.write( '{} {} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} liquid_rate=0\n'.format( times[i].tos, wellNames[j],  0, 0, 0, 0, 0  ) )                                    
                 	pltOutFile.write( '{} {}  liquid_rate=0\n'.format( times[i].tos, wellNames[j] ) )                                    
-    ###### окончание обработки испытаний ######
 
+    ###### окончание обработки испытаний ######
