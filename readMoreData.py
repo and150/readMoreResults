@@ -14,6 +14,7 @@ from readrate import readRATE
 import getwt
 import getplt
 import getcpt
+import getStartRate
 from printrate import printRate
 
 
@@ -50,6 +51,7 @@ parser.add_argument("inputfile", help="provides a name of *.mis file to read")
 parser.add_argument("-w","--WT", action="store_true", help ="generates well tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
 parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
+parser.add_argument("-a","--AVR", action="store_true", help ="generates start oil rates, average oil rates for the first year of production and cumulatieves")
 args = parser.parse_args()
 
 currDir = os.path.dirname( os.path.abspath(args.inputfile))
@@ -81,6 +83,11 @@ try:
     if args.PLT:
         # выгрузка профилей притока 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
+
+    if args.AVR:
+        # выгрузка стартовыж дебитов, средних дебитов за первый год и накопленной добычи
+        getStartRate.getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)
+
 #    else:
 #        print("no action chosen for {}".format(rootName))
 
