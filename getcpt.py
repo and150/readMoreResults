@@ -73,10 +73,12 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
     if(i>=0 and j>=0):
         for x in wellNames:
             wi = (wellNames.index(x))
-            printCptByDate(ResArr, times, T, V, x, wi, cptDate, i, cptOutFile)
-            printCptByDate(ResArr, times, T, V, x, wi, cptDate1, j, cptOutFile)
-            cptOutFile.write('\n') # переход на новую строку
-            #print()
+            # WQ filter !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if x[0:4] == "WQ2-" or x == "WQ-11" or x == "WQ-13":
+                printCptByDate(ResArr, times, T, V, x, wi, cptDate, i, cptOutFile)
+                printCptByDate(ResArr, times, T, V, x, wi, cptDate1, j, cptOutFile)
+                cptOutFile.write('\n') # переход на новую строку
+                #print()
     else:
         print("{0:s} - no such date".format(cptDate))
 
