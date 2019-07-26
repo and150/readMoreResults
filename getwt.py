@@ -80,9 +80,13 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                 currLiq  = ResArr[T*V*wi + T* cts.Sopr + i] + ResArr[T*V*wi + T* cts.Swpr + i] + ResArr[T*V*wi + T* cts.Swir + i]# текущий расчетный дебит жидкости
                 currLiqH = ResArr[T*V*wi + T* cts.Hopr + i] + ResArr[T*V*wi + T* cts.Hwpr + i] + ResArr[T*V*wi + T* cts.Hwir + i]# текущий фактический дебит жидкости
 
+                #currOil  = ResArr[T*V*wi + T* cts.Sopr + i] # текущий расчетный дебит нефти
+                #currOilH = ResArr[T*V*wi + T* cts.Hopr + i] # текущий фактический дебит нефти
 
                 currP  = ResArr[T*V*wi + T* cts.Sbhp + i]   #расчетное давление 
                 currPH = ResArr[T*V*wi + T* cts.Hbhp + i]   #фактическое давление 
+                maxP = currP
+                maxPH = currPH
                 if currP <= cts.PTOL or currPH <= cts.PTOL :
                     maxP = maxP
                     maxPH = maxPH
@@ -99,6 +103,7 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                     if(nextLiq <= liqCut):                          
                         PBUstr = PBUstr + x.well + " " + str(times[i].tos) #имя скважины и время начала КВД
                         PBUstr = PBUstr + " " + str(currLiq) + " " + str(currLiqH) # расчетный и фактический дебит(приемистость) жидкости
+                        ###PBUstr = PBUstr + " " + str(currOil) + " " + str(currOilH) # расчетный и фактический дебит(приемистость) нефти         #### временный вывод дебита нефти ####
                         PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Sbhp + i]) #расчетное забойное 
                         PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Hbhp + i])  #фактическое забойное
                 else:
@@ -114,6 +119,7 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
         PBUstr = PBUstr + " " + str(maxP)   #расчетное пластовое
         PBUstr = PBUstr + " " + str(maxPH)   #фактическое пластовое
         PBUstr = PBUstr + " " + str(times[i].tos)  # время окончания КВД                       
+
 
         wtOutFile.write("WT="+str(x.wt)+" "+PBUstr+"\n") #вывод параметров PBU в файл        
     outFile.close()

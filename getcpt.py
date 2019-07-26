@@ -46,6 +46,9 @@ def getTimeStepNumber(times, startDate, stringDate="01.01.1900 00:00:00"):
 
 
 # function prints information for cross-plots
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# there is a CONSTANT filter for well names (prints only wells starting with 'WQ2-' and 'WQ-11' and 'WQ-13'
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
     ResArr = RateOut[0]
     wellNames = RateOut[1]
