@@ -6,21 +6,47 @@ from datescompare import date2days
 from printrate import printRate
 
 
-def printCptByDate(ResArr, times, T, V,  x, wi,  cptDate, i, outFile):
-    outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[i].tos))  # вывод даты и времени шага
-    outFile.write('{0:s} '.format(x) ) # вывод имени скважины
+def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDate, tstep_i, outFile, search_last_bhp = False):
+
+    outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[tstep_i].tos))  # вывод даты и времени шага
+    outFile.write('{0:s} '.format(curr_well_name) ) # вывод имени скважины
     
-    outFile.write('{0:3f} '.format(ResArr[T*V*wi + T*cts.Sopt + i]) )  # вывод расчетной накопленной добычи нефти
-    outFile.write('{0:3f} '.format(ResArr[T*V*wi + T*cts.Hopt + i]) )  # вывод фактической накопленной добычи нефти
+    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sopt + tstep_i]) )  # вывод расчетной накопленной добычи нефти
+    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hopt + tstep_i]) )  # вывод фактической накопленной добычи нефти
 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Swit + i]) )  # вывод расчетной накопленной закачки 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Hwit + i]) )  # вывод фактической накопленной закачки 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swit + tstep_i]) )  # вывод расчетной накопленной закачки 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwit + tstep_i]) )  # вывод фактической накопленной закачки 
 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Swpt + i]) )  # вывод расчетной накопленной добычи воды 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Hwpt + i]) )  # вывод фактической накопленной добычи воды 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swpt + tstep_i]) )  # вывод расчетной накопленной добычи воды 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwpt + tstep_i]) )  # вывод фактической накопленной добычи воды 
 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Sbhp + i]) )  # вывод расчетного забойного давления                
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*wi + T*cts.Hbhp + i]) )  # вывод фактического забойного давления                
+
+
+    def get_last_defined_bhp(ResArr, T, V, curr_well_index, tstep_i):
+        search_tstep_i = tstep_i
+        while search_tstep_i > 0:
+            if ResArr[T*V*curr_well_index + T*cts.Hbhp + search_tstep_i] > cts.PTOL:
+                return [ResArr[T*V*curr_well_index + T*cts.Sbhp + search_tstep_i], 
+                        ResArr[T*V*curr_well_index + T*cts.Hbhp + search_tstep_i], 
+                        search_tstep_i]
+            search_tstep_i -= 1
+
+        # if something wrong... just return original timestep values
+        return [ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i], 
+                ResArr[T*V*curr_well_index + T*cts.Hbhp + tstep_i], 
+                tstep_i]
+
+    # find the latest defined BHP if not defined on the CPT date
+    if search_last_bhp:
+        latest_defined_pressures = get_last_defined_bhp(ResArr, T, V, curr_well_index, tstep_i)        
+        outFile.write('{0:5.3f} '.format(latest_defined_pressures[0]) )  # вывод расчетного забойного давления                
+        outFile.write('{0:5.3f} '.format(latest_defined_pressures[1]) )  # вывод фактического забойного давления                
+        #outFile.write(f'{times[latest_defined_pressures[2]].tos} ' )  # debug вывод даты последнего определенного давления  
+
+    # print BHP on the CPT date (might be undefined if a gauge has been removed) 
+    else:
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i]) )  # вывод расчетного забойного давления                
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hbhp + tstep_i]) )  # вывод фактического забойного давления                
 
 
 # function gets date-time and returns timestep number or -1 if date-time not found
@@ -63,23 +89,24 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
 
 
     # get date one (or more) month behind, number of months set in constants
-    cptDate1 = datetime.datetime.strptime(cptDate, "%d.%m.%Y %H:%M:%S")
-    cptDate1 = cptDate1 - relativedelta(months = 1)
-    cptDate1 = cptDate1.strftime("%d.%m.%Y %H:%M:%S")
+    cptDate_month_behind = datetime.datetime.strptime(cptDate, "%d.%m.%Y %H:%M:%S")
+    cptDate_month_behind = cptDate_month_behind - relativedelta(months = 1)
+    cptDate_month_behind = cptDate_month_behind.strftime("%d.%m.%Y %H:%M:%S")
     #print(cptDate, cptDate1)
 
     # get timestep number for crossplot date and previous date
-    i = getTimeStepNumber(times, startDate, cptDate)
-    j = getTimeStepNumber(times, startDate, cptDate1)
+    tstep_i = getTimeStepNumber(times, startDate, cptDate)
+    tstep_j = getTimeStepNumber(times, startDate, cptDate_month_behind)
+    #print(tstep_i, tstep_j)
 
 
-    if(i>=0 and j>=0):
-        for x in wellNames:
-            wi = (wellNames.index(x))
+    if(tstep_i>=0 and tstep_j>=0):
+        for curr_well_name in wellNames:
+            curr_well_index = (wellNames.index(curr_well_name))
             # WQ filter !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if x[0:4] == "WQ2-" or x == "WQ-11" or x == "WQ-13":
-                printCptByDate(ResArr, times, T, V, x, wi, cptDate, i, cptOutFile)
-                printCptByDate(ResArr, times, T, V, x, wi, cptDate1, j, cptOutFile)
+            if curr_well_name[0:4] == "WQ2-" or curr_well_name == "WQ-11" or curr_well_name == "WQ-13":
+                printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate, tstep_i, cptOutFile, False)
+                printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate_month_behind, tstep_j, cptOutFile)
                 cptOutFile.write('\n') # переход на новую строку
                 #print()
     else:
