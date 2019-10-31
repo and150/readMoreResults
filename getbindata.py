@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import struct
 
 def getBinData(bts, type="int",size=1,pr=0):

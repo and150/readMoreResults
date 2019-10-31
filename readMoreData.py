@@ -40,7 +40,7 @@ def readMore(currDir, rootName): # read MORE result files
 
 
   
-# функция профилирования для оценки быстродействия
+# profiler start
 #pr = cProfile.Profile()
 #pr.enable()
 
@@ -61,8 +61,8 @@ print(currDir, rootName)
 
 
 try:
-    # глобальные переменные
-    out = []          # массив результатов расчета
+    # global variables
+    out = []          # results array
 
     #read MORE results
     out = readMore(currDir,rootName)
@@ -73,19 +73,19 @@ try:
     RateOut = out[3]
 
     if args.CPT!="-999":
-        # выгрузка кроссплотов 
+        # crossplot generation 
         getcpt.getCPT(currDir, rootName, startDate, times, numsArray, RateOut, args.CPT)      
 
     if args.WT:
-        # выгрузка показателей по ГДИ
+        # well test results output
         getwt.getWT(currDir, rootName, startDate, times, numsArray, RateOut)      
 
     if args.PLT:
-        # выгрузка профилей притока 
+        # PLT profiles output 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
 
     if args.AVR:
-        # выгрузка стартовыж дебитов, средних дебитов за первый год и накопленной добычи
+        # start rates, first year av.rates and cumulatives export
         getStartRate.getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)
 
 #    else:
@@ -94,7 +94,7 @@ try:
 
     #printRate(times, numsArray, RateOut) 
     #print(time.time()-stime)
-    # вывод параметров быстродействия
+    # profiler parameters output
     #pr.disable()
     #s = io.StringIO()   
     #ps = pstats.Stats(pr, stream = s)

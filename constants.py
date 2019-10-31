@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 # number of base vectors to read 
 # 6 vectors simulated and history oil rate, water rate, pressure, cumulative oil, water, injection 
 # 3 vectors simulated cumulatives oil, water, injection
@@ -25,11 +26,11 @@ Hopt  = 12
 Hwpt  = 13
 Hwit  = 14
 
-LIQCUT = 0.0105 # отсечка по дебиту жидкости для КВД
+LIQCUT = 0.0105 # liquid rate cut for PBU
 TIMETOL = 0.0001 # 0.001
 PTOL = 0.02
 MONTHDELTA = 1
 
-NBINT = 4    # количество байт в целом числе
-NBREAL = 4   # количество байт в реальном числе
-NBFLOAT = 4  # количество байт в числе с пл.точкой
+NBINT = 4    # bytes in integer
+NBREAL = 4   # bytes in real
+NBFLOAT = 4  # bytes in float

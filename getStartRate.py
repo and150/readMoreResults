@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import constants as cts
 import datetime
 import time
@@ -44,11 +45,11 @@ def getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut):
     for i in range(0,len(wellNames)):
         wellNames[i] = wellNames[i].rstrip()
 
-    #cptOutFile = open(currDir+"\\"+rootName+".CPTout","w") # файл вывода кроссплотов 
-    T = len(times) # количество записей RATE
-    W = len(wellNames) # количество скважин
-    MZ = numsArray[5-1] # количество слоев в скважинах (кол-во ячеек по вертикали, нужно сюда передавать параметр
-    V = cts.VEC + MZ*2*numsArray[55-1]       # количество векторов 
+    #cptOutFile = open(currDir+"\\"+rootName+".CPTout","w") # crossplot out file
+    T = len(times) # number of rate-file records
+    W = len(wellNames) # amount of wells
+    MZ = numsArray[5-1] # amount of layers
+    V = cts.VEC + MZ*2*numsArray[55-1]       # amount of vectors
 
 
 

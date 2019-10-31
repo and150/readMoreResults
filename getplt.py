@@ -1,9 +1,10 @@
+#-*- coding:utf-8 -*-
 import constants as cts
 import datetime
 import time
 from datescompare import *
 
-#################### вспомогательные функции дл€ вывода профилей притока #######################
+#################### PLT output functions #######################
 class WTItem:
     def __init__(self, pltInts, well="", start = 0.0, stop = 0.0, wt = 0  ):    
         self.well = well     # well name
@@ -53,23 +54,23 @@ def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
 
 
 
-    pltFileName = currDir+"\\"+rootName+".PLTlist"  # им€ входного файла со списком исследований PLT
-    pltOutFile = open(currDir+"\\"+rootName+".PLTout","w") # файл вывода таблицы исследований PLT
+    pltFileName = currDir+"\\"+rootName+".PLTlist"  # input PLT list
+    pltOutFile = open(currDir+"\\"+rootName+".PLTout","w") # PLT out file
 
-    MZ = numsArray[5-1] # количество слоев в скважинах (кол-во €чеек по вертикали, нужно сюда передавать параметр
-    T = len(times) # количество записей RATE
-    W = len(wellNames) # количество скважин
-    V = cts.VEC + MZ*2*numsArray[55-1]       # vectors amount 
+    MZ = numsArray[5-1] # number of layers
+    T = len(times) # rate file records number
+    W = len(wellNames) # wells amount
+    V = cts.VEC + MZ*2*numsArray[55-1]      # vectors amount 
     Vbase = cts.VEC
 
-    # чтение списка PLT
+    # read PLT
     PLTlist = []       
     PLTlist = GetPLTlist(pltFileName,startDate)
     #for p in PLTlist:
     #    print(p.well, days2date(p.start, startDate), p.pltInts)
 
 
-    for x in PLTlist: # дл€ всех скважино-профилеметрий в списке
+    for x in PLTlist: # for all wells and PLTs
         j = (wellNames.index(x.well))     
         #print(x.well, x.wt, x.start, days2date(x.start, startDate)) # debug
 
@@ -81,22 +82,19 @@ def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
                 pltarr = [0]*MZ 
                 for k in range(0,MZ):
                     #print("{:.3f}".format(ResArr[T*V*j + T*(Vbase+k) + i] + ResArr[T*V*j + T*(Vbase+MZ+k) + i]), end=" ")    # debug out
-                    # генераци€ временного вектора PLT на каждый временной шаг дл€ каждой скважины
-                    # жидкость  V - количество основных скважинных векторов, MZ- количество соединений
+                    # temporaty PLT-vector for every timestep for every well                   
                     pltarr[k] = ResArr[T*V*j + T*(Vbase+k) + i] + ResArr[T*V*j + T*(Vbase+MZ+k) + i] 
 
-                #вывод на консоль
+                # console out
                 #print(pltarr)
-                #print(sum(pltarr[0:4]), sum(pltarr[4:7]) ,sum(pltarr[7:10]), end = " ") # вывод суммы по пачкам (индексы надо ¬–”„Ќ”ё проставить...)
-                #print(sum(pltarr[0:34]), sum(pltarr[34:56]), sum(pltarr[56:66]), sum(pltarr[66:75]), sum(pltarr[75:89]), end = " ") # вывод суммы по пачкам (индексы надо ¬–”„Ќ”ё проставить...)
+                #print(sum(pltarr[0:4]), sum(pltarr[4:7]) ,sum(pltarr[7:10]), end = " ") # 
+                #print(sum(pltarr[0:34]), sum(pltarr[34:56]), sum(pltarr[56:66]), sum(pltarr[66:75]), sum(pltarr[75:89]), end = " ") # 
                 #print()  
 
-                #вывод в файл 
+                # print to file
                 pltLR = sum(pltarr) 
                 if pltLR != 0: 
                     printPlt(x, pltarr, pltLR, times, wellNames, i , j, pltOutFile)
 
                 else:
                 	pltOutFile.write( '{} {}  liquid_rate=0\n'.format( times[i].tos, wellNames[j] ) )                                    
-
-    ###### окончание обработки испытаний ######

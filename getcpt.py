@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import constants as cts
 import datetime
 import time
@@ -8,17 +9,17 @@ from printrate import printRate
 
 def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDate, tstep_i, outFile, search_last_bhp = False):
 
-    outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[tstep_i].tos))  # вывод даты и времени шага
-    outFile.write('{0:s} '.format(curr_well_name) ) # вывод имени скважины
+    outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[tstep_i].tos))  # date and time
+    outFile.write('{0:s} '.format(curr_well_name) ) # well name
     
-    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sopt + tstep_i]) )  # вывод расчетной накопленной добычи нефти
-    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hopt + tstep_i]) )  # вывод фактической накопленной добычи нефти
+    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sopt + tstep_i]) )  # simulated cumulative oil
+    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hopt + tstep_i]) )  # historic cumulative oil
 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swit + tstep_i]) )  # вывод расчетной накопленной закачки 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwit + tstep_i]) )  # вывод фактической накопленной закачки 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swit + tstep_i]) )  # simulated cumulative injection
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwit + tstep_i]) )  # historic cumulative injection
 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swpt + tstep_i]) )  # вывод расчетной накопленной добычи воды 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwpt + tstep_i]) )  # вывод фактической накопленной добычи воды 
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swpt + tstep_i]) )  # simulated cumulative water
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwpt + tstep_i]) )  # historic cumulative water
 
 
 
@@ -39,14 +40,14 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
     # find the latest defined BHP if not defined on the CPT date
     if search_last_bhp:
         latest_defined_pressures = get_last_defined_bhp(ResArr, T, V, curr_well_index, tstep_i)        
-        outFile.write('{0:5.3f} '.format(latest_defined_pressures[0]) )  # вывод расчетного забойного давления                
-        outFile.write('{0:5.3f} '.format(latest_defined_pressures[1]) )  # вывод фактического забойного давления                
-        #outFile.write(f'{times[latest_defined_pressures[2]].tos} ' )  # debug вывод даты последнего определенного давления  
+        outFile.write('{0:5.3f} '.format(latest_defined_pressures[0]) )  # simulated BHP
+        outFile.write('{0:5.3f} '.format(latest_defined_pressures[1]) )  # historic BHP
+        #outFile.write(f'{times[latest_defined_pressures[2]].tos} ' )  # debug output of the last defined BHP
 
     # print BHP on the CPT date (might be undefined if a gauge has been removed) 
     else:
-        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i]) )  # вывод расчетного забойного давления                
-        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hbhp + tstep_i]) )  # вывод фактического забойного давления                
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i]) )  # simulated BHP
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hbhp + tstep_i]) )  # historic BHP
 
 
 # function gets date-time and returns timestep number or -1 if date-time not found
@@ -81,11 +82,11 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
     for i in range(0,len(wellNames)):
         wellNames[i] = wellNames[i].rstrip()
 
-    cptOutFile = open(currDir+"\\"+rootName+".CPTout","w") # файл вывода кроссплотов 
-    T = len(times) # количество записей RATE
-    W = len(wellNames) # количество скважин
-    MZ = numsArray[5-1] # количество слоев в скважинах (кол-во ячеек по вертикали, нужно сюда передавать параметр
-    V = cts.VEC + MZ*2*numsArray[55-1]       # количество векторов 
+    cptOutFile = open(currDir+"\\"+rootName+".CPTout","w")
+    T = len(times)  
+    W = len(wellNames) 
+    MZ = numsArray[5-1] 
+    V = cts.VEC + MZ*2*numsArray[55-1]       
 
 
     # get date one (or more) month behind, number of months set in constants
@@ -107,7 +108,7 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
             if curr_well_name[0:4] == "WQ2-" or curr_well_name == "WQ-11" or curr_well_name == "WQ-13":
                 printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate, tstep_i, cptOutFile, False)
                 printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate_month_behind, tstep_j, cptOutFile)
-                cptOutFile.write('\n') # переход на новую строку
+                cptOutFile.write('\n')
                 #print()
     else:
         print("{0:s} - no such date".format(cptDate))
@@ -129,25 +130,25 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
 #
 #                   print('{0:s} {1:5.2f} '.format(line.strip('\n'), times[i].tos), end = ' ' ) 
 #
-#                   print('{0:s}'.format(x), end = ' ') # вывод имени скважины
+#                   print('{0:s}'.format(x), end = ' ') #
 #                   
-#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Sopt + i]), end = ' ')  # вывод расчетной накопленной добычи нефти
-#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Hopt + i]), end = ' ')  # вывод фактической накопленной добычи нефти
+#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Sopt + i]), end = ' ')  #
+#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Hopt + i]), end = ' ')  #
 #
 #                   print(' ',end=' ')
 #
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swit + i]), end = ' ')  # вывод расчетной накопленной закачки 
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwit + i]), end = ' ')  # вывод фактической накопленной закачки 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swit + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwit + i]), end = ' ')  # 
 #
 #                   print(' ',end=' ')
 #
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swpt + i]), end = ' ')  # вывод расчетной накопленной добычи воды 
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwpt + i]), end = ' ')  # вывод фактической накопленной добычи воды 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swpt + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwpt + i]), end = ' ')  # 
 #                   
 #                   print(' ',end=' ')
 #
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Sbhp + i]), end = ' ')  # вывод расчетного забойного давления                
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hbhp + i]), end = ' ')  # вывод фактического забойного давления                
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Sbhp + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hbhp + i]), end = ' ')  # 
 #                   
 #                   print()
 #

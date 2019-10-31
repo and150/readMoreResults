@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 from getbindata import getBinData
 
 
@@ -12,7 +13,7 @@ def readMISC(file):
     ni = getBinData(file,'int',1,)[0]           # Ni = number of values in next recort (i - integer)               #record of 1 int       
     tArr =  getBinData(file,'int',ni,1)       # tArr - temporary array # gets Date of run, units & case flag
 
-    ####### записываем дату начала расчетов во внешнюю переменную
+    ####### get start date into global variable
     SDAT = []
     SDAT.append(tArr[0])
     SDAT.append(tArr[1])
@@ -36,13 +37,13 @@ def readMISC(file):
     nrv = getBinData(file,'int',1,)[0]               # nrv length of revision date (30)    #record of 1 int    
     
     revDate =  ''.join(getBinData(file,'char',nrv,))  # revision date                       #record of nrv chars      
-    #prHeadI = ''.join(getBinData(file,'char',nph,))   # programm header I                   #record of nph chars      проблема с декодингом кириллицы, разобратьс€ как нибудь потом
+    #prHeadI = ''.join(getBinData(file,'char',nph,))   # programm header I                   #record of nph chars     
     #prHeadII = ''.join(getBinData(file,'char',nph,))  # programm header II                  #record of nph chars
     #skip headers
     prHeadI = file.read(nph)         # programm header I                   #record of nph chars    
     prHeadII = file.read(nph)        # programm header II                  #record of nph chars
     
-    #revDate = getBinData(file,'int',nrv,)          # revision date                       #record of nrv chars   выкидывает ошибку на некоторых файлах   
+    #revDate = getBinData(file,'int',nrv,)          # revision date                       #record of nrv chars 
     #prHeadI = getBinData(file,'int',nph,)          # programm header I                   #record of nph chars    
     #prHeadII = getBinData(file,'int',nph,)         # programm header II                  #record of nph chars
 
@@ -112,7 +113,7 @@ def readMISC(file):
     nbflui = getBinData(file,'int',1,)[0]             # nbflui                              #record of 1 int            
     eos = getBinData(file,'int',1,)[0]                # for black oil eos=0                 #record of 1 int    
     #if(eos == 1):
-        # !!!!!!!!!!!!!!!!!   need section to read EoS parameters (а вообще надо переписать чтение файла с возможностью выбора читаемой секции, с использованием чисел байтов в секци€х)
+        # !!!!!!!!!!!!!!!!!   need section to read EoS parameters ()
     
     #### debug print ####
     #print(sect_name.decode("utf-8"))    

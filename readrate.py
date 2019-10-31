@@ -1,11 +1,12 @@
+#-*- coding:utf-8 -*-
 import array
 import struct
 from getbindata import getBinData
 import constants as cts
  
 def readRATE (file, nums=[], times=[]):
-    # nums[] - массив адресов показателей
-    # nrate - количество временных шагов в файле rat
+    # nums[] - addresses array
+    # nrate - amount of timesteps in rate-file
 
     class RatesHeader:
     # local class of 1-st time step header    
@@ -92,7 +93,7 @@ def readRATE (file, nums=[], times=[]):
     if (NAQUIF > 0): AQNAMES = getBinData(file,'char16',NAQUIF,) #Aquifer names  
     #print(WNAMES)    
 
-    #массивы для хранения индексов исторических показателей                
+    # history arrays
     qoprh = [-1]*mw
     qwprh = [-1]*mw
     qbhph = [-1]*mw  
@@ -100,7 +101,7 @@ def readRATE (file, nums=[], times=[]):
     qwefa = [-1]*mw      
 
     #read quantity data (Mnemonics, Units, Associated names, Descriptions) !!!need check!!!!
-    HARR = [] # массив заголовков векторов скважин (дополнительных вектров  miscellaneous???? 
+    HARR = [] # array of vectors' headers (additional vectors miscellaneous
     for i in range(0,nquant): 
         block = file.read(nqchar+nqinte*nbi+nqreal*nbr)
         rh = RatesHeader()
@@ -142,7 +143,7 @@ def readRATE (file, nums=[], times=[]):
     wtype = [0]*mw  # trigger of well type
     compArr = []  # array for well completion
 
-    # расчет длины считываемого блока 
+    # calculation of a length of input data block
     wlen =  nbi*(NIIRATE + NIIRPTR*mwzone + mwl*2)  + nbf*(NIWRATE + 3*mstr + ncompt*3 + NIWMCMP*mwzone + ncompt*mwzone + IWVCMP*NIWVCMP*mwzone + IWVLAY*NIWVLAY*mwzone)
     glen =  nbi*1 + nbf*(leng + NIGRVOL*nstr + mw + NIGVLAY*mwzone)
     aqlen = nbf*NIRAQU
@@ -152,7 +153,7 @@ def readRATE (file, nums=[], times=[]):
     # by timesteps
     for n in range(0,nrate): 
        
-        # чтение записи для одного временного шага
+        # reads one timestep
         line = file.read(totlen )
 
         #if n%50==0:
@@ -170,7 +171,7 @@ def readRATE (file, nums=[], times=[]):
             s = j*wlen 
             f = s + NIIRATE*nbi
             iarr.frombytes(line[s:f])              
-            wtype[j] = iarr[7]  #wtype = buffArr[7]          # запоминаем текущий тип скважины (1 - добывающая, -1 - нагнетательная)
+            wtype[j] = iarr[7]  #wtype = buffArr[7]          # remember the type of the well (1 - producer, -1 - injector)
 
         
             # irptr       # Completion location data          int*4
@@ -178,7 +179,7 @@ def readRATE (file, nums=[], times=[]):
             s = f 
             f = s + NIIRPTR*mwzone*nbi
             iarr.frombytes(line[s:f])
-            compArr = iarr[mwzone*3:mwzone*4] # запоминаем массив номеров текущих активных соединений
+            compArr = iarr[mwzone*3:mwzone*4] #  get array of the current flowing connections
 
 
             # irlim       # Well constraint information       int*4
@@ -191,7 +192,7 @@ def readRATE (file, nums=[], times=[]):
             f = s + NIWRATE*nbf
             farr.frombytes(line[s:f])      
             #print(farr)
-            ResArr[nrate*V*j + nrate* cts.Sbhp + n] = farr[3]        # записываем забойное давление, скорректированное на ссылочную глубину            
+            ResArr[nrate*V*j + nrate* cts.Sbhp + n] = farr[3]        # get bottom hole pressure referenced
            
 
             # wrvol    # Well volume rates and totals  float*4
@@ -200,14 +201,14 @@ def readRATE (file, nums=[], times=[]):
             f = s + 3*mstr*nbf
             farr.frombytes(line[s:f])   
             #print(farr)
-            ResArr[nrate*V*j + nrate* cts.Sopr + n] = farr[0]   # записываем дебит нефти
-            ResArr[nrate*V*j + nrate* cts.Sopt + n] = farr[5]   # записываем накопленную нефть для добывающих
-            ResArr[nrate*V*j + nrate* cts.Swpt + n] = farr[7]   # записываем накопленную воду  для добывающих
+            ResArr[nrate*V*j + nrate* cts.Sopr + n] = farr[0]   # get oil rate
+            ResArr[nrate*V*j + nrate* cts.Sopt + n] = farr[5]   # get cumulative oil for producers
+            ResArr[nrate*V*j + nrate* cts.Swpt + n] = farr[7]   # get cumulative water for producers
             if(wtype[j] == 1): 
-                ResArr[nrate*V*j + nrate* cts.Swpr + n] = farr[2]   # записываем дебит воды для добывающих
+                ResArr[nrate*V*j + nrate* cts.Swpr + n] = farr[2]   # get water rate for producers
             elif(wtype[j]==-1):
-                ResArr[nrate*V*j + nrate* cts.Swir + n] = farr[1]   # приемистость для нагнетательных  
-                ResArr[nrate*V*j + nrate* cts.Swit + n] = farr[11]   # записываем накопленную закачку для нагнетательных 
+                ResArr[nrate*V*j + nrate* cts.Swir + n] = farr[1]   # injectivity (water rate) for injectors
+                ResArr[nrate*V*j + nrate* cts.Swit + n] = farr[11]   # get cumulative injection for injectors
            
 
             # wrms         # Well molar rates and totals      float*4
@@ -228,10 +229,10 @@ def readRATE (file, nums=[], times=[]):
                 s = f + ncompt*3*nbf + NIWMCMP*mwzone*nbf + ncompt*mwzone*nbf
                 f = s + NIWVCMP*mwzone*nbf
                 farr.frombytes(line[s:f])
-                for kk in range(0,mwzone): # итерация по слоям модели
+                for kk in range(0,mwzone): # iteration by grid layers
                    if compArr[kk] !=0:
-                      ResArr[nrate*V*j + nrate*(Vbase + compArr[kk]-1) + n] = farr[kk]  # записываем дебит нефти по перфорациям                   
-                      ResArr[nrate*V*j + nrate*(Vbase + mwzone + compArr[kk] - 1) + n] = farr[kk + 2*mwzone] # записываем дебит воды(приемистость) по перфорациям
+                      ResArr[nrate*V*j + nrate*(Vbase + compArr[kk]-1) + n] = farr[kk]  # get connection oil rate
+                      ResArr[nrate*V*j + nrate*(Vbase + mwzone + compArr[kk] - 1) + n] = farr[kk + 2*mwzone] # get connection water rate (injection rate)
 
 
 
@@ -257,20 +258,20 @@ def readRATE (file, nums=[], times=[]):
         #for k in range(0,NAQUIF): 
         #    file.seek(NIRAQU*floatSize, 1)    #aquifer    !!!!!not tested on model with aquifer, might be a source of errors!!!!!
 
-        #READ QUANTITY DATA (дополнительные вектора, указанные в заголовке)
+        #READ QUANTITY DATA (miscellaneous vecors named in headers)
         del farr[:]
         s = mw*wlen + mg*glen + NAQUIF*aqlen 
         f = s + nquant*nbr        
         farr.frombytes(line[s:f]) #buffArr = getBinData(file,'float',nquant,)
         #print(farr)
-        # считывание дополнительных массивов 
+        # read miscellaneous vectors (history vectors)
         for j in range(0,mw):
             if(qoprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hopr + n] = farr[qoprh[j]] # get history oil rates if any
             if(qwprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwpr + n] = farr[qwprh[j]] # get history water rates if any
-            if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*cts.Hwir + n] = farr[qwirh[j]]  # ВНИМАНИЕ, если есть приемистость, то переписываем ее вместо дебита воды!!!!  как-то сомнительно.... но на тестовой модели работает, а на реальной нет....                                                
+            if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*cts.Hwir + n] = farr[qwirh[j]]  # ACHTUNG!!, if there is injection it is written instead of water rate
             if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
             if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
-            # расчет исторических накопленных показателей
+            # calculation of history cumulatives
             if(n==0):
                 ResArr[nrate*V*j + nrate*cts.Hopt + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hopr + n] * times[n].tos / 1000
                 ResArr[nrate*V*j + nrate*cts.Hwpt + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hwpr + n] * times[n].tos / 1000
@@ -282,7 +283,7 @@ def readRATE (file, nums=[], times=[]):
 
 
             
-        # возвращаем массив прочиатнных данных, повременная запись конвертирована в массив векторов
+        # return array of data read, timesteps converted to array of vectors
     #return Items
     file.close()
     return (ResArr, WNAMES)
