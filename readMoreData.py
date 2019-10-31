@@ -12,6 +12,7 @@ from readctl  import readCTL
 from readrate import readRATE 
 
 import getwt
+import getit
 import getplt
 import getcpt
 import getStartRate
@@ -49,6 +50,7 @@ def readMore(currDir, rootName): # read MORE result files
 parser = argparse.ArgumentParser()
 parser.add_argument("inputfile", help="provides a name of *.mis file to read")
 parser.add_argument("-w","--WT", action="store_true", help ="generates well tests output")
+parser.add_argument("-i","--IT", action="store_true", help ="generates well interferention tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
 parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
 parser.add_argument("-a","--AVR", action="store_true", help ="generates start oil rates, average oil rates for the first year of production and cumulatieves")
@@ -80,6 +82,10 @@ try:
         # well test results output
         getwt.getWT(currDir, rootName, startDate, times, numsArray, RateOut)      
 
+    if args.IT:
+        # well test results output
+        getit.getIT(currDir, rootName, startDate, times, numsArray, RateOut)      
+        
     if args.PLT:
         # PLT profiles output 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
