@@ -99,6 +99,7 @@ def readRATE (file, nums=[], times=[]):
     qbhph = [-1]*mw  
     qwirh = [-1]*mw      
     qwefa = [-1]*mw      
+    qthph = [-1]*mw
 
     #read quantity data (Mnemonics, Units, Associated names, Descriptions) !!!need check!!!!
     HARR = [] # array of vectors' headers (additional vectors miscellaneous
@@ -117,6 +118,7 @@ def readRATE (file, nums=[], times=[]):
             if (HARR[i].mnem.strip() == "wwirh" and HARR[i].asname.strip() == WNAMES[j].strip()): qwirh[j] = i                   
             if (HARR[i].mnem.strip() == "wbhph" and HARR[i].asname.strip() == WNAMES[j].strip()): qbhph[j] = i              
             if (HARR[i].mnem.strip() == "wefa"  and HARR[i].asname.strip() == WNAMES[j].strip()): qwefa[j] = i              
+            if (HARR[i].mnem.strip() == "wthph" and HARR[i].asname.strip() == WNAMES[j].strip()): qthph[j] = i              
             #print(HARR[i].mnem.strip() + " |" + HARR[i].asname.strip()+ "| "+ str(i) + " "+ str(j)+" |" +WNAMES[j].strip()+"| ")
 
     #### debug print ####
@@ -191,8 +193,9 @@ def readRATE (file, nums=[], times=[]):
             s = f + mwl*2*nbi
             f = s + NIWRATE*nbf
             farr.frombytes(line[s:f])      
-            #print(farr)
+            print(farr
             ResArr[nrate*V*j + nrate* cts.Sbhp + n] = farr[3]        # get bottom hole pressure referenced
+            ResArr[nrate*V*j + nrate* cts.Sthp + n] = farr[9]        # get tubing head pressure
            
 
             # wrvol    # Well volume rates and totals  float*4
@@ -271,6 +274,7 @@ def readRATE (file, nums=[], times=[]):
             if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*cts.Hwir + n] = farr[qwirh[j]]  # ACHTUNG!!, if there is injection it is written instead of water rate
             if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
             if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
+            if(qthph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hthp + n] = farr[qthph[j]] # get history bhp if any 
             # calculation of history cumulatives
             if(n==0):
                 ResArr[nrate*V*j + nrate*cts.Hopt + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hopr + n] * times[n].tos / 1000

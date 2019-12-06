@@ -9,7 +9,8 @@ import numpy as np
 
 from readmisc import readMISC 
 from readctl  import readCTL  
-from readrate import readRATE 
+#from readrate import readRATE 
+from readrt import readRATE 
 
 import getwt
 import getit

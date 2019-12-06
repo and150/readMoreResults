@@ -49,6 +49,9 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
         outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i]) )  # simulated BHP
         outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hbhp + tstep_i]) )  # historic BHP
 
+        # print THP
+        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Sthp + tstep_i]:5.3f} ')  # simulated THP
+        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Hthp + tstep_i]:5.3f} ')  # historic THP
 
 # function gets date-time and returns timestep number or -1 if date-time not found
 def getTimeStepNumber(times, startDate, stringDate="01.01.1900 00:00:00"):
