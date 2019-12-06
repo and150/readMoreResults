@@ -44,6 +44,10 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
         outFile.write('{0:5.3f} '.format(latest_defined_pressures[1]) )  # historic BHP
         #outFile.write(f'{times[latest_defined_pressures[2]].tos} ' )  # debug output of the last defined BHP
 
+        # print THP (TO DO find latest_defined TH pressure)
+        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Sthp + tstep_i]:5.3f} ')  # simulated THP
+        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Hthp + tstep_i]:5.3f} ')  # historic THP
+
     # print BHP on the CPT date (might be undefined if a gauge has been removed) 
     else:
         outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i]) )  # simulated BHP

@@ -193,7 +193,7 @@ def readRATE (file, nums=[], times=[]):
             s = f + mwl*2*nbi
             f = s + NIWRATE*nbf
             farr.frombytes(line[s:f])      
-            print(farr
+            #print(farr)
             ResArr[nrate*V*j + nrate* cts.Sbhp + n] = farr[3]        # get bottom hole pressure referenced
             ResArr[nrate*V*j + nrate* cts.Sthp + n] = farr[9]        # get tubing head pressure
            
