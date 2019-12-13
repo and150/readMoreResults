@@ -40,6 +40,10 @@ def readMore(currDir, rootName): # read MORE result files
 	    RateOut = readRATE(file, numsArray, times) 
     return(startDate, times, numsArray, RateOut)
 
+def readGrid(currDir, rootName): # read MORE Grid file
+    # GRID
+    pass
+
 
   
 # profiler start
