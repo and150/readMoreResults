@@ -10,6 +10,7 @@ import numpy as np
 from readmisc import readMISC 
 from readctl  import readCTL  
 from readrate import readRATE 
+from readgrd  import read_static_arrays
 #from readrt import readRATE 
 
 import getwt
@@ -40,9 +41,11 @@ def readMore(currDir, rootName): # read MORE result files
 	    RateOut = readRATE(file, numsArray, times) 
     return(startDate, times, numsArray, RateOut)
 
-def readGrid(currDir, rootName): # read MORE Grid file
+def read_grd(currDir, rootName): # read MORE Grid file
     # GRID
-    pass
+    with open(currDir+"\\"+rootName+".grd", "r+b") as file:  
+        read_static_arrays(file) 
+    #return(grd_out)
 
 
   
@@ -58,16 +61,22 @@ parser.add_argument("-w","--WT", action="store_true", help ="generates well test
 parser.add_argument("-i","--IT", action="store_true", help ="generates well interferention tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
 parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
+parser.add_argument("-g","--GRD", action="store_true", help ="read grid file - static arrays")
 parser.add_argument("-a","--AVR", action="store_true", help ="generates start oil rates, average oil rates for the first year of production and cumulatieves")
 args = parser.parse_args()
 
 currDir = os.path.dirname( os.path.abspath(args.inputfile))
 rootName = os.path.basename(args.inputfile).split('.')[0]
-
-print(currDir, rootName)
-
+#print(currDir, rootName)
 
 try:
+
+    if args.GRD:
+        # GRID read 
+        read_grd(currDir,rootName)
+        sys.exit(0)
+
+    # TODO need to organize separate grid and rate file reading
     # global variables
     out = []          # results array
 
@@ -95,10 +104,10 @@ try:
         # PLT profiles output 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
 
+
     if args.AVR:
         # start rates, first year av.rates and cumulatives export
         getStartRate.getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)
-
 #    else:
 #        print("no action chosen for {}".format(rootName))
 

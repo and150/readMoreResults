@@ -34,6 +34,7 @@ TIMETOL = 0.0001 # 0.001
 PTOL = 0.02
 MONTHDELTA = 1
 
+NBCHAR = 1   # bytes in char
 NBINT = 4    # bytes in integer
 NBREAL = 4   # bytes in real
 NBFLOAT = 4  # bytes in float
