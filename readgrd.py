@@ -1,6 +1,13 @@
 import array
 import constants as cts
 
+def get_ijk_values_from_array(array, dimensions, connections):
+    I,J,K = dimensions[0], dimensions[1], dimensions[2]
+    for item in connections:
+        i,j,k = item[0]-1,item[1]-1,item[2]-1
+        print(item[0],item[1],item[2], array[I*J*k + I*j + i])
+
+
 def read_static_arrays(file):
 
     def read_byte_array(start, end, file, arr_type = 'l'):
@@ -42,40 +49,49 @@ def read_static_arrays(file):
                             read_byte_array(s,f, file)))
             #print(LG_header)
 
-    nzt = header['lkey']+header['ltits']+header['ltitl']
+    lkey, ltits, ltitl = header['lkey'], header['ltits'], header['ltitl']
+    nzt = lkey + ltits + ltitl
 
-
-# TODO now file is read sequentally, it is nesessary to realize random access (map file first)
-    nga = 5 
-    f = 1*cts.NBINT + number_of_header*cts.NBINT + \
-        header['nLG']*(1*cts.NBINT+num_of_LG_header*cts.NBINT)
-    #print(f)
-
-    s = f + nga*nzt*cts.NBCHAR + nga*header['2*nz+2']*cts.NBINT 
-    f = s + nzt*cts.NBCHAR
-    array_title = array.array.tobytes(read_byte_array(s,f, file,'b'))
-    print(array_title)
-    print(f"s,f = {s},{f}, {f-s}")
-    s = f
-    f = s + header['2*nz+2']*cts.NBINT
-    size_info_by_layer = read_byte_array(s,f, file)
-    print(size_info_by_layer)
-    print(f"s,f = {s},{f}, {f-s}")
-    print("next")
-
-'''
-    for nga in range(1, header['nga']):
+    # read array headers (nga)
+    grd_array_index = {}
+    for nga in range(0, header['nga']):
         s = f
-        f = s + nzt*cts.NBCHAR
-        print(f"s,f = {s},{f}, {f-s}")
-        array_title = array.array.tobytes(read_byte_array(s,f, file,'b'))
-        
+        f = s + lkey*cts.NBCHAR
+        key = array.array.tobytes(read_byte_array(s,f, file,'b')).decode("utf-8")
+
+        s = f
+        f = s + ltits*cts.NBCHAR
+        short_title = array.array.tobytes(read_byte_array(s,f, file,'b'))
+
+        s = f
+        f = s + ltitl*cts.NBCHAR
+        long_title = array.array.tobytes(read_byte_array(s,f, file,'b'))
+
+        #title = list(map((lambda x: x.decode("utf-8")), [key,short_title, long_title])) 
+        #print(title)
+        #print(key, short_title, long_title)
+
         s = f
         f = s + header['2*nz+2']*cts.NBINT
-        print(f"s,f = {s},{f}, {f-s}")
-        print("next")
+        #print(f"s,f = {s},{f}, {f-s}")
         size_info_by_layer = read_byte_array(s,f, file)
+        #grd_array_index.update({key: size_info_by_layer})
+        #print(key, size_info_by_layer)
+        grd_array_index.update({key: sum(list(filter(lambda x: x>0, size_info_by_layer))) })
 
-        #print(array_title)
-        #print(size_info_by_layer)
-'''
+
+    # read necessary arrays
+    temp_array = []
+    for item in grd_array_index:
+        del temp_array[:]
+        s = f
+        f = s + grd_array_index[item]*cts.NBREAL
+    
+        out_arrays = ['DZTV','PERMX', 'PERMY']
+        if item.strip() in  out_arrays:
+            temp_array = read_byte_array(s,f, file, 'f')
+            #print(item, temp_array)
+            get_ijk_values_from_array(temp_array, [header['nx'],header['ny'],header['nz']],  [(60,1,k+1) for k in range(85)])        
+        else:
+            file.seek(f)
+        
