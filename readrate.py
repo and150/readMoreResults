@@ -87,6 +87,7 @@ def readRATE (input_file, nums=[], times=[]):
 
     nrate = len(times)
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
+    perf_array = [] # array of well completions by timesteps and by well numbers [timestep, well_number, [i-index], [j-index], [k-index]]
 
     WNAMES = []
     for i in range(mw): 
@@ -153,7 +154,9 @@ def readRATE (input_file, nums=[], times=[]):
     farr = array.array('f')
 
     wtype = [0]*mw  # trigger of well type
-    compArr = []  # array for well completion
+    i_comp = []  # i-index of well completions
+    j_comp = []  # j-index of well completions
+    k_comp = []  # k-index of well completions
 
     # calculation of a length of input data block
     wlen =  nbi*(NIIRATE + NIIRPTR*mwzone + mwl*2)  + nbf*(NIWRATE + 3*mstr + ncompt*3 + NIWMCMP*mwzone + ncompt*mwzone + IWVCMP*NIWVCMP*mwzone + IWVLAY*NIWVLAY*mwzone)
@@ -191,7 +194,12 @@ def readRATE (input_file, nums=[], times=[]):
             s = f 
             f = s + NIIRPTR*mwzone*nbi
             iarr.frombytes(line[s:f])
-            compArr = iarr[mwzone*3:mwzone*4] #  get array of the current flowing connections
+            block_index = iarr[mwzone*0:mwzone*1]
+            i_comp = iarr[mwzone*1:mwzone*2] #  get i-index of the current flowing connections
+            j_comp = iarr[mwzone*2:mwzone*3] #  get j-index of the current flowing connections
+            k_comp = iarr[mwzone*3:mwzone*4] #  get k-index of the current flowing connections
+            perf_array.append([n,j,[*i_comp], [*j_comp], [*k_comp]]) # append current well connections
+            #print(f"timestep={n}, wellnumber= {j}, block_index={block_index}, comps={[i_comp, j_comp, k_comp]}") # debug
 
 
             # irlim       # Well constraint information       int*4
@@ -243,9 +251,9 @@ def readRATE (input_file, nums=[], times=[]):
                 f = s + NIWVCMP*mwzone*nbf
                 farr.frombytes(line[s:f])
                 for kk in range(0,mwzone): # iteration by grid layers
-                   if compArr[kk] !=0:
-                      ResArr[nrate*V*j + nrate*(Vbase + compArr[kk]-1) + n] = farr[kk]  # get connection oil rate
-                      ResArr[nrate*V*j + nrate*(Vbase + mwzone + compArr[kk] - 1) + n] = farr[kk + 2*mwzone] # get connection water rate (injection rate)
+                   if k_comp[kk] !=0:
+                      ResArr[nrate*V*j + nrate*(Vbase + k_comp[kk]-1) + n] = farr[kk]  # get connection oil rate
+                      ResArr[nrate*V*j + nrate*(Vbase + mwzone + k_comp[kk] - 1) + n] = farr[kk + 2*mwzone] # get connection water rate (injection rate)
 
 
 
@@ -300,6 +308,9 @@ def readRATE (input_file, nums=[], times=[]):
         # return array of data read, timesteps converted to array of vectors
     #return Items
     input_file.close()
-    return (ResArr, WNAMES)
+
+    #[print(f"timestep={item[0]} well_num={item[1]} i-index={item[2]} j-index={item[3]} k-index={item[4]}") for item in perf_array] # debug
+
+    return (ResArr, WNAMES, perf_array)
 
 

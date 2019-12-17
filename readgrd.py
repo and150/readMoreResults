@@ -19,6 +19,7 @@ def read_static_arrays(input_file):
     s = 0
     f = 1*cts.NBINT
     number_of_header = read_byte_array(s,f, input_file)[0]
+    #print(f"number_of_header={number_of_header}") # debug
 
     s = f
     f = s + number_of_header*cts.NBINT 
@@ -28,18 +29,18 @@ def read_static_arrays(input_file):
                     'activeMaps','dpbdtFlag','drvdtFlag','coarsenFlag',
                     'mapaxesFlag','not_used'], 
                     read_byte_array(s,f, input_file)))
-    print(header)
+    #print(header)
 
     # if any LGRs TODO test no LGR run
-    num_of_LG_header = 0
     if header['nLG'] > 0: 
         s = f
         f = s + 1*cts.NBINT
         num_of_LG_header = read_byte_array(s,f, input_file)[0]
-        
-        for nL in range(0,header['nLG']):
+        #print(f"num_of_LG_header={num_of_LG_header}") # debug
+
+        for nL in range(1,header['nLG']+1):
             s = f
-            f = s + nL*num_of_LG_header*cts.NBINT 
+            f = s + num_of_LG_header*cts.NBINT 
             LG_header = dict(zip (['nxL','nyL','nzL', 'ixl','ixu','iyl',
                                     'iyu','izl','izu','Radial flag',
                                     'Parent local grid','not used0','not used1',
@@ -47,7 +48,10 @@ def read_static_arrays(input_file):
                                     'Maximum vertex count','not used2','not used3',
                                     'not used4','not used5'],
                             read_byte_array(s,f, input_file)))
-            print(LG_header)
+            s = f
+            f = s + 64*cts.NBCHAR 
+            LG_name = array.array.tobytes(read_byte_array(s,f, input_file,'b'))
+            #print(LG_name,"\n", LG_header, end="\n") # debug
 
     lkey, ltits, ltitl = header['lkey'], header['ltits'], header['ltitl']
     nzt = lkey + ltits + ltitl
@@ -68,8 +72,7 @@ def read_static_arrays(input_file):
         long_title = array.array.tobytes(read_byte_array(s,f, input_file,'b'))
 
         #title = list(map((lambda x: x.decode("utf-8")), [key,short_title, long_title])) 
-        #print(title)
-        #print(key, short_title, long_title)
+        #print(title,"\n",key, short_title, long_title) # debug
 
         s = f
         f = s + header['2*nz+2']*cts.NBINT
