@@ -1,8 +1,26 @@
 #-*- coding:utf-8 -*-
-import struct
+#import struct
+import array
 
-def getBinData(bts, type="int",size=1,pr=0):
-#read binary data from file stream and return array of tuples
+def getBinData(input_file, input_type='char',amount=1,pr=0): 
+    bytes_length = {'int':4, 'float':4, 'char':1}
+    types = {'int':'l', 'float':'f', 'char':'b'}
+
+    arr = array.array(types[input_type])
+    arr.frombytes(input_file.read(amount*bytes_length[input_type]))
+
+    if input_type is 'char': 
+        arr = array.array.tobytes(arr).decode('utf-8')
+
+    if pr== 1: print(arr)
+    if amount > 1: 
+        return arr
+    else:
+        return arr[0]
+
+
+
+'''
     ARRAY = [0]*size
     if (type=='int'):
        for i in range(0,size):
@@ -22,6 +40,6 @@ def getBinData(bts, type="int",size=1,pr=0):
     else: return 0
     if(pr==1): print (ARRAY) #comment to stop printing array
     return (ARRAY)
-
+'''
 
 

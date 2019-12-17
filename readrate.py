@@ -4,9 +4,9 @@ import struct
 from getbindata import getBinData
 import constants as cts
  
-def readRATE (file, nums=[], times=[]):
+def readRATE (input_file, nums=[], times=[]):
     # nums[] - addresses array
-    # nrate - amount of timesteps in rate-file
+    # nrate - amount of timesteps in rate-input_file
 
     class RatesHeader:
     # local class of 1-st time step header    
@@ -88,10 +88,20 @@ def readRATE (file, nums=[], times=[]):
     nrate = len(times)
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
 
-    WNAMES = getBinData(file,'char16',mw,) #Well names   
-    GNAMES = getBinData(file,'char16',mg,) #Group names  
-    if (NAQUIF > 0): AQNAMES = getBinData(file,'char16',NAQUIF,) #Aquifer names  
-    #print(WNAMES)    
+    WNAMES = []
+    for i in range(mw): 
+        WNAMES.append(getBinData(input_file,'char',16,))   #Well names   
+    #print(WNAMES) # debug
+
+    GNAMES = []
+    for i in range(mg):
+        GNAMES.append(getBinData(input_file,'char',16,))   #Group names  
+    #print(GNAMES) # debug
+
+    if (NAQUIF > 0): 
+        AQNAMES = []
+        for i in range(NAQUIF):
+            AQNAMES.append(getBinData(input_file,'char',16,)) #Aquifer names  
 
     # history arrays
     qoprh = [-1]*mw
@@ -104,7 +114,7 @@ def readRATE (file, nums=[], times=[]):
     #read quantity data (Mnemonics, Units, Associated names, Descriptions) !!!need check!!!!
     HARR = [] # array of vectors' headers (additional vectors miscellaneous
     for i in range(0,nquant): 
-        block = file.read(nqchar+nqinte*nbi+nqreal*nbr)
+        block = input_file.read(nqchar+nqinte*nbi+nqreal*nbr)
         rh = RatesHeader()
         rh.getData(block)
         HARR.append(rh)
@@ -156,7 +166,7 @@ def readRATE (file, nums=[], times=[]):
     for n in range(0,nrate): 
        
         # reads one timestep
-        line = file.read(totlen )
+        line = input_file.read(totlen )
 
         #if n%50==0:
         #    print("STEP ",n)     # debug output                      
@@ -223,7 +233,7 @@ def readRATE (file, nums=[], times=[]):
 
 
             # wrcmp        # Completion molar flow rates      float*4
-            #file.seek(ncompt*mwzone*nbf,1)            
+            #input_file.seek(ncompt*mwzone*nbf,1)            
 
 
             # wvcmp        # Completion volume flows float*4
@@ -248,24 +258,24 @@ def readRATE (file, nums=[], times=[]):
         #READ GROUP AND FIP DATA
         #line.seek(mg*(1*intSize + leng*floatSize + NIGRVOL*nstr*floatSize + mw*floatSize + NIGVLAY*mwzone*floatSize ),1)
         #for k in range(0,mg): 
-        #    file.seek(1*intSize,1)             #sep          # separator flag                    int*4
-        #    file.seek(leng*floatSize,1)        #gdata        # General group data               float*4    
+        #    input_file.seek(1*intSize,1)             #sep          # separator flag                    int*4
+        #    input_file.seek(leng*floatSize,1)        #gdata        # General group data               float*4    
         #    for k in range(0,NIGRVOL):         #grvol        # General group volumes            float*4
-        #        file.seek(nstr*floatSize, 1)   #grvol
-        #    file.seek(mw*floatSize,1)          #wfr          # Fraction for each well in group  float*4
+        #        input_file.seek(nstr*floatSize, 1)   #grvol
+        #    input_file.seek(mw*floatSize,1)          #wfr          # Fraction for each well in group  float*4
         #    for k in range(0,NIGVLAY):         #gvlay        # Group layer volume flows         float*4 
-        #        file.seek(mwzone*floatSize,1)  #gvlay
+        #        input_file.seek(mwzone*floatSize,1)  #gvlay
 
         #READ AQUIFER DATA (IF ANY)
         #line.seek(NAQUIF*NIRAQU*floatSize, 1)
         #for k in range(0,NAQUIF): 
-        #    file.seek(NIRAQU*floatSize, 1)    #aquifer    !!!!!not tested on model with aquifer, might be a source of errors!!!!!
+        #    input_file.seek(NIRAQU*floatSize, 1)    #aquifer    !!!!!not tested on model with aquifer, might be a source of errors!!!!!
 
         #READ QUANTITY DATA (miscellaneous vecors named in headers)
         del farr[:]
         s = mw*wlen + mg*glen + NAQUIF*aqlen 
         f = s + nquant*nbr        
-        farr.frombytes(line[s:f]) #buffArr = getBinData(file,'float',nquant,)
+        farr.frombytes(line[s:f]) #buffArr = getBinData(input_file,'float',nquant,)
         #print(farr)
         # read miscellaneous vectors (history vectors)
         for j in range(0,mw):
@@ -289,7 +299,7 @@ def readRATE (file, nums=[], times=[]):
             
         # return array of data read, timesteps converted to array of vectors
     #return Items
-    file.close()
+    input_file.close()
     return (ResArr, WNAMES)
 
 

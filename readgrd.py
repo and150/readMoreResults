@@ -8,17 +8,17 @@ def get_ijk_values_from_array(array, dimensions, connections):
         print(item[0],item[1],item[2], array[I*J*k + I*j + i])
 
 
-def read_static_arrays(file):
+def read_static_arrays(input_file):
 
-    def read_byte_array(start, end, file, arr_type = 'l'):
+    def read_byte_array(start, end, input_file, arr_type = 'l'):
         arr = array.array(arr_type)
-        arr.frombytes(file.read(end-start))
+        arr.frombytes(input_file.read(end-start))
         return arr
 
     # READ GRD FILE
     s = 0
     f = 1*cts.NBINT
-    number_of_header = read_byte_array(s,f, file)[0]
+    number_of_header = read_byte_array(s,f, input_file)[0]
 
     s = f
     f = s + number_of_header*cts.NBINT 
@@ -27,7 +27,7 @@ def read_static_arrays(file):
                     'iblkmd','2*nz+2','nLG','na',
                     'activeMaps','dpbdtFlag','drvdtFlag','coarsenFlag',
                     'mapaxesFlag','not_used'], 
-                    read_byte_array(s,f, file)))
+                    read_byte_array(s,f, input_file)))
     print(header)
 
     # if any LGRs TODO test no LGR run
@@ -35,7 +35,7 @@ def read_static_arrays(file):
     if header['nLG'] > 0: 
         s = f
         f = s + 1*cts.NBINT
-        num_of_LG_header = read_byte_array(s,f, file)[0]
+        num_of_LG_header = read_byte_array(s,f, input_file)[0]
         
         for nL in range(0,header['nLG']):
             s = f
@@ -46,7 +46,7 @@ def read_static_arrays(file):
                                     'Number of active cells','Pebi flag',
                                     'Maximum vertex count','not used2','not used3',
                                     'not used4','not used5'],
-                            read_byte_array(s,f, file)))
+                            read_byte_array(s,f, input_file)))
             print(LG_header)
 
     lkey, ltits, ltitl = header['lkey'], header['ltits'], header['ltitl']
@@ -57,15 +57,15 @@ def read_static_arrays(file):
     for nga in range(0, header['nga']):
         s = f
         f = s + lkey*cts.NBCHAR
-        key = array.array.tobytes(read_byte_array(s,f, file,'b')).decode("utf-8")
+        key = array.array.tobytes(read_byte_array(s,f, input_file,'b')).decode("utf-8")
 
         s = f
         f = s + ltits*cts.NBCHAR
-        short_title = array.array.tobytes(read_byte_array(s,f, file,'b'))
+        short_title = array.array.tobytes(read_byte_array(s,f, input_file,'b'))
 
         s = f
         f = s + ltitl*cts.NBCHAR
-        long_title = array.array.tobytes(read_byte_array(s,f, file,'b'))
+        long_title = array.array.tobytes(read_byte_array(s,f, input_file,'b'))
 
         #title = list(map((lambda x: x.decode("utf-8")), [key,short_title, long_title])) 
         #print(title)
@@ -74,7 +74,7 @@ def read_static_arrays(file):
         s = f
         f = s + header['2*nz+2']*cts.NBINT
         #print(f"s,f = {s},{f}, {f-s}")
-        size_info_by_layer = read_byte_array(s,f, file)
+        size_info_by_layer = read_byte_array(s,f, input_file)
         #grd_array_index.update({key: size_info_by_layer})
         #print(key, size_info_by_layer)
         grd_array_index.update({key: sum(list(filter(lambda x: x>0, size_info_by_layer))) })
@@ -89,11 +89,11 @@ def read_static_arrays(file):
     
         out_arrays = ['DZTV','PERMX', 'PERMY']
         if item.strip() in  out_arrays:
-            temp_array = read_byte_array(s,f, file, 'f')
+            temp_array = read_byte_array(s,f, input_file, 'f')
             #print(item, temp_array)
             get_ijk_values_from_array(temp_array, [header['nx'],header['ny'],header['nz']],  [(60,1,k+1) for k in range(85)])        
         else:
-            file.seek(f)
-    # TODO create LGR arrays reading (necessary for ara file)
+            input_file.seek(f)
+    # TODO create LGR arrays reading (necessary for ara input_file)
         
         '''
