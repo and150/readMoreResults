@@ -130,7 +130,8 @@ def readMISC(file):
     mstrp = getBinData(file,'int',1,)[0]         #max streams + 1                     #record of 1 int
     mlim = getBinData(file,'int',1,)[0]          #max limits                          #record of 1 int
     method = getBinData(file,'int',1,)[0]        #XXX for upwards compatibility       #record of 1 int   
-
+    print(f"sect_name, nblimi, nlim, mstrp, mlim, method")
+    print(f"{sect_name}, {nblimi}, {nlim}, {mstrp}, {mlim}, {method}")
     #records of above dimensions    
     WLIMIT = getBinData(file,'char16',mlim) # Names of well limits
     IDXVAR = getBinData(file,'int',mlim)  # A value of 6 indicates a rate limit, a value <6 indicates a ration limit
@@ -200,12 +201,12 @@ def readMISC(file):
         RESTSTEP = getBinData(file,'int',nipr,)
         STARTTIME =getBinData(file,'float',nfpr,)
     #### debug print ####
-    #print(sect_name, nbrest, niblock)
-    #print("number of restarts: ",nrest)
-    #print(ncpr, nipr, nfpr)
-    #print(NAMEOFRUN)
-    #print(RESTSTEP)
-    #print(STARTTIME)
+    print(f"sect_name={sect_name}, nbrest = {nbrest}, niblock = {niblock}")
+    print("number of restarts: ",nrest)
+    print(ncpr, nipr, nfpr)
+    print(NAMEOFRUN)
+    print(RESTSTEP)
+    print(STARTTIME)
     #### end of debug print #### 
    
     return (SDAT, nums) # returns STARTDATE and NUMS array 

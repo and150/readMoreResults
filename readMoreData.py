@@ -71,12 +71,7 @@ rootName = os.path.basename(args.inputfile).split('.')[0]
 
 try:
 
-    if args.GRD:
-        # GRID read 
-        read_grd(currDir,rootName)
-        sys.exit(0)
 
-    # TODO need to organize separate grid and rate file reading
     # global variables
     out = []          # results array
 
@@ -103,6 +98,10 @@ try:
     if args.PLT:
         # PLT profiles output 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
+
+    if args.GRD:
+        # GRID read 
+        read_grd(currDir,rootName) # reads some static arrays
 
 
     if args.AVR:

@@ -28,7 +28,7 @@ def read_static_arrays(file):
                     'activeMaps','dpbdtFlag','drvdtFlag','coarsenFlag',
                     'mapaxesFlag','not_used'], 
                     read_byte_array(s,f, file)))
-    #print(header)
+    print(header)
 
     # if any LGRs TODO test no LGR run
     num_of_LG_header = 0
@@ -47,7 +47,7 @@ def read_static_arrays(file):
                                     'Maximum vertex count','not used2','not used3',
                                     'not used4','not used5'],
                             read_byte_array(s,f, file)))
-            #print(LG_header)
+            print(LG_header)
 
     lkey, ltits, ltitl = header['lkey'], header['ltits'], header['ltitl']
     nzt = lkey + ltits + ltitl
@@ -79,8 +79,8 @@ def read_static_arrays(file):
         #print(key, size_info_by_layer)
         grd_array_index.update({key: sum(list(filter(lambda x: x>0, size_info_by_layer))) })
 
-
-    # read necessary arrays
+'''
+    # read requested arrays
     temp_array = []
     for item in grd_array_index:
         del temp_array[:]
@@ -94,4 +94,6 @@ def read_static_arrays(file):
             get_ijk_values_from_array(temp_array, [header['nx'],header['ny'],header['nz']],  [(60,1,k+1) for k in range(85)])        
         else:
             file.seek(f)
+    # TODO create LGR arrays reading (necessary for ara file)
         
+        '''
