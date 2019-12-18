@@ -8,7 +8,7 @@ def get_ijk_values_from_array(array, dimensions, connections):
         print(item[0],item[1],item[2], array[I*J*k + I*j + i])
 
 
-def read_static_arrays(input_file):
+def read_static_arrays(input_file, out_arrays_names):
 
     def read_byte_array(start, end, input_file, arr_type = 'l'):
         arr = array.array(arr_type)
@@ -82,21 +82,26 @@ def read_static_arrays(input_file):
         #print(key, size_info_by_layer)
         grd_array_index.update({key: sum(list(filter(lambda x: x>0, size_info_by_layer))) })
 
-'''
     # read requested arrays
+    out_arrays = {} 
     temp_array = []
     for item in grd_array_index:
         del temp_array[:]
         s = f
         f = s + grd_array_index[item]*cts.NBREAL
     
-        out_arrays = ['DZTV','PERMX', 'PERMY']
-        if item.strip() in  out_arrays:
+        if item.strip() in  out_arrays_names:
             temp_array = read_byte_array(s,f, input_file, 'f')
             #print(item, temp_array)
-            get_ijk_values_from_array(temp_array, [header['nx'],header['ny'],header['nz']],  [(60,1,k+1) for k in range(85)])        
+            out_arrays.update({item.strip():[*temp_array]})
+            #get_ijk_values_from_array(temp_array, [header['nx'],header['ny'],header['nz']],  [(60,1,k+1) for k in range(85)])        
         else:
             input_file.seek(f)
+
     # TODO create LGR arrays reading (necessary for ara input_file)
         
-        '''
+    return(out_arrays)
+
+
+
+

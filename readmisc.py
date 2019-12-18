@@ -11,7 +11,7 @@ def readMISC(input_file):
     nbytes1 = getBinData(input_file,'int',1,)      # number of bytes in the section                                  #record of 1 int    
     method = getBinData(input_file,'int',1,)       # Method XYZ, X - major version, Y - minor version, Z - revision   #record of 1 int    
     ni = getBinData(input_file,'int',1,)           # Ni = number of values in next recort (i - integer)               #record of 1 int       
-    tArr =  getBinData(input_file,'int',ni,)       # tArr - temporary array # gets Date of run, units & case flag
+    tArr =  getBinData(input_file,'int',ni,1)       # tArr - temporary array # gets Date of run, units & case flag
 
     ####### get start date into global variable
     SDAT = []

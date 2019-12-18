@@ -13,6 +13,7 @@ from readrate import readRATE
 from readgrd  import read_static_arrays
 #from readrt import readRATE 
 
+import getkh
 import getwt
 import getit
 import getplt
@@ -41,10 +42,10 @@ def readMore(currDir, rootName): # read MORE result files
 	    RateOut = readRATE(file, numsArray, times) 
     return(startDate, times, numsArray, RateOut)
 
-def read_grd(currDir, rootName): # read MORE Grid file
+def read_grd(currDir, rootName, out_arrays_names): # read MORE Grid file
     # GRID
     with open(currDir+"\\"+rootName+".grd", "r+b") as file:  
-        read_static_arrays(file) 
+        return read_static_arrays(file,out_arrays_names) 
     #return(grd_out)
 
 
@@ -61,7 +62,7 @@ parser.add_argument("-w","--WT", action="store_true", help ="generates well test
 parser.add_argument("-i","--IT", action="store_true", help ="generates well interferention tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
 parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
-parser.add_argument("-g","--GRD", action="store_true", help ="read grid file - static arrays")
+parser.add_argument("-k","--KH", action="store", help ="get perms and h-s from static array file")
 parser.add_argument("-a","--AVR", action="store_true", help ="generates start oil rates, average oil rates for the first year of production and cumulatieves")
 args = parser.parse_args()
 
@@ -82,6 +83,8 @@ try:
     times = out[1]
     numsArray = out[2]
     RateOut = out[3]
+    well_names = RateOut[1]
+    perfs_array = RateOut[2]
 
     if args.CPT!="-999":
         # crossplot generation 
@@ -99,9 +102,10 @@ try:
         # PLT profiles output 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
 
-    if args.GRD:
+    if args.KH:
         # GRID read 
-        read_grd(currDir,rootName) # reads some static arrays
+        out_arrays = read_grd(currDir,rootName, ['DZTV', 'PERMX', 'PERMY']) # reads some static arrays
+        getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate) 
 
 
     if args.AVR:
