@@ -104,7 +104,8 @@ try:
 
     if args.KH:
         # GRID read 
-        out_arrays = read_grd(currDir,rootName, ['DZTV', 'PERMX', 'PERMY']) # reads some static arrays
+        out_arrays_names = ['DZTV','PERMX', 'PERMY'] #['DZTV','PERMX','PERMY'] 
+        out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
         getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate) 
 
 

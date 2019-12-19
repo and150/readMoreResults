@@ -9,17 +9,20 @@ def get_wells_cells(out_arrays, wells_dates_filename, well_names, perfs_array, t
     #print(dates)
 
 
+    #print(f"Main_arrays\n{out_arrays[0]}")
+    #print(f"LG_arrays\n{out_arrays[1]}")
+    #print( [(item, out_arrays[0][item]) for item in out_arrays[0]]) # debug Main grid arrays printing
+    #or lgr in out_arrays[1]: print( [(item, lgr[item]) for item in lgr] ) # debug LG grids arrays printing
+    #print(f"grid_dimensions={out_arrays[2]}")
+
+
+    #TODO pass here GRID and LGRs dimensions
     #TODO choose dates_from_file form dates
+    #TODO find out how to distinguish if a well is in LGR and the number of this LGR if any 
 
-
-
-    #print(f"out_arrays\n{out_arrays}")
-    #print()
-    #print(f"wells_dates_filename\n{wells_dates_filename}")
-    #print()
-    #print(f"well_names\n{well_names}")
-    #print()
-    #print(f"perfs_array\n{perfs_array}")
+    #print(f"\n wells_dates_filename\n{wells_dates_filename}")
+    #print(f"\n well_names\n{well_names}")
+    #print(f"\n perfs_array\n{perfs_array}")
 
     #print()
     #print(f"times\n{times}")
