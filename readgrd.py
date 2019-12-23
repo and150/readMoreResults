@@ -13,6 +13,33 @@ def read_byte_array(start, end, input_file, arr_type = 'l'):
     arr.frombytes(input_file.read(end-start))
     return arr
 
+def get_null_ranges(rvol_array):
+    gap_indexes ={}
+    prev_item = -999
+    gap_start = False
+    i, n = 0, 0
+    for item in rvol_array:
+        if item ==0 and prev_item !=0:
+            gap_start = True
+        if item !=0 and prev_item ==0:
+            gap_start = False
+            gap_indexes.update({i-n:n})
+            n = 0
+        if gap_start == True:
+            n+=1
+        i+=1
+        prev_item = item
+    return gap_indexes
+
+def insert_gaps(target_array, gaps_dict):
+    #print(gaps_dict)
+    for gap in gaps_dict:
+        #print(gap)
+        target_array[gap:gap] = list(x*0 for x in range(gaps_dict[gap]))
+    #print(f"after= {target_array}")
+    return target_array
+
+
 
 # READ GRD FILE
 def read_static_arrays(input_file, out_arrays_names):
@@ -32,7 +59,6 @@ def read_static_arrays(input_file, out_arrays_names):
                     read_byte_array(s,f, input_file)))
     #print(header)
 
-    #TODO active maps support (only active cells written, except RVOL)
 
     # if any LGRs
     LG_names = []
@@ -84,10 +110,9 @@ def read_static_arrays(input_file, out_arrays_names):
         f = s + header['2*nz+2']*cts.NBINT
         #print(f"s,f = {s},{f}, {f-s}") # debug
         size_info_by_layer = read_byte_array(s,f, input_file)
+        #print(size_info_by_layer)
         grd_array_index.update({key: sum(list(filter(lambda x: x>0, size_info_by_layer[:-2]))) }) # remove 2 last elements in index header !!!
     #print(f"grd_array_index={grd_array_index}")
-
-
 
 
 
@@ -95,19 +120,35 @@ def read_static_arrays(input_file, out_arrays_names):
     main_grid_dimensions = [header['nx'], header['ny'], header['nz']]
     main_grid_arrays = {} 
     temp_array = []
+    gaps_dict = {}
     for item in grd_array_index:
         del temp_array[:]
         s = f
-        f = s + grd_array_index[item]*cts.NBREAL
-    
-        if item.strip() in  out_arrays_names:  # outputs only requested array
-        #if True:
+        #f = s + grd_array_index[item]*cts.NBREAL
+
+        if item.strip() in ['RVOL','XGRI','YGRI','ZGRI']:
+            f = s + grd_array_index[item]*cts.NBREAL
+        else:
+            if header['activeMaps'] == 1:
+                f = s + header['na']*cts.NBREAL
+            else:
+                f = s + grd_array_index[item]*cts.NBREAL
+
+        if item.strip() == 'RVOL':
+            gaps_dict = get_null_ranges(read_byte_array(s,f, input_file, 'f'))
+
+
+        if item.strip() in out_arrays_names:  # outputs only requested array plus RVOL
             temp_array = read_byte_array(s,f, input_file, 'f')
-            main_grid_arrays.update({item.strip():[*temp_array]})
+            #print(f"before= {temp_array}")
+            #insert_gaps(list(temp_array), gaps_dict)
+            #main_grid_arrays.update({item.strip():[*temp_array]})
+            main_grid_arrays.update({item.strip():insert_gaps(list(temp_array), gaps_dict)})
         else:
             input_file.seek(f)
 
 
+    #TODO active maps support for LGR (it seems that I'v done it for main grid (need to test)) !!!
     # read requested LGR arrays
     LG_grid_dimensions = []
     LG_grid_arrays_list = [] 
