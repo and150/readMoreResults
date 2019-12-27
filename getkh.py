@@ -12,7 +12,7 @@ def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections):
 
 
 
-def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, times, start_date_array):
+def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, times, start_date_array):  # gets values only for perforated cells (perfs from rate-file)
     s_d = datetime(start_date_array[2], start_date_array[1], start_date_array[0])
 
     # print wells and dates from the request and compose them with indexes of the wells from the model (well_names list)
@@ -38,11 +38,8 @@ def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, t
     #print(f"Main_arrays\n{out_arrays[0]}")
     #for item in out_arrays[0]: print(item, )
     #print(f"LG_arrays\n{out_arrays[1]}")
-<<<<<<< HEAD
 
-=======
     #print( [(item) for item in out_arrays[0]]) # debug Main grid arrays printing
->>>>>>> ec52d622d5fe0163ada71ad4af5facf33aa92a54
     #print( [(item, out_arrays[0][item]) for item in out_arrays[0]]) # debug Main grid arrays printing
     #or lgr in out_arrays[1]: print( [(item, lgr[item]) for item in lgr] ) # debug LG grids arrays printing
     #print(f"grid_dimensions={out_arrays[2]}")
