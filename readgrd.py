@@ -115,9 +115,11 @@ def read_static_arrays(input_file, out_arrays_names):
     #print(f"grd_array_index={grd_array_index}")
 
 
-
+    # TODO need to be refactored (make one cycle for Main grid and for all LGRs
     # read requested arrays from main grid
-    main_grid_dimensions = [header['nx'], header['ny'], header['nz']]
+    out_arrays = []
+    #main_grid_dimensions = [header['nx'], header['ny'], header['nz']]
+    grid_dimensions = [[header['nx'], header['ny'], header['nz']]]
     main_grid_arrays = {} 
     temp_array = []
     gaps_dict = {}
@@ -134,7 +136,7 @@ def read_static_arrays(input_file, out_arrays_names):
             else:
                 f = s + grd_array_index[item]*cts.NBREAL
 
-        if item.strip() == 'RVOL':
+        if header['activeMaps'] == 1 and item.strip() == 'RVOL':
             gaps_dict = get_null_ranges(read_byte_array(s,f, input_file, 'f'))
 
 
@@ -146,6 +148,7 @@ def read_static_arrays(input_file, out_arrays_names):
             main_grid_arrays.update({item.strip():insert_gaps(list(temp_array), gaps_dict)})
         else:
             input_file.seek(f)
+    out_arrays.append(main_grid_arrays)        
 
 
     #TODO active maps support for LGR (it seems that I'v done it for main grid (need to test)) !!!
@@ -171,7 +174,11 @@ def read_static_arrays(input_file, out_arrays_names):
                 else:
                     input_file.seek(f)
             LG_grid_arrays_list.append(LG_grid_arrays)
+            out_arrays.append(LG_grid_arrays)
             LG_grid_dimensions.append([LG_header[LG]['nxL'], LG_header[LG]['nyL'], LG_header[LG]['nzL']])
+            grid_dimensions.append([LG_header[LG]['nxL'], LG_header[LG]['nyL'], LG_header[LG]['nzL']])
 
     #print([main_grid_arrays, LG_grid_arrays_list])
+    #for item in out_arrays: print(item)
+    print([out_arrays, grid_dimensions])
     return [main_grid_arrays, LG_grid_arrays_list, [main_grid_dimensions, LG_grid_dimensions]]

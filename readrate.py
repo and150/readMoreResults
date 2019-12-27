@@ -84,7 +84,6 @@ def readRATE (input_file, nums=[], times=[]):
     V = cts.VEC + mwzone*2*IWVCMP # number of base vectors + number of layers* 2 (oil, water) if output by layers is present  
     Vbase = cts.VEC
 
-
     nrate = len(times)
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
     perf_array = [] # array of well completions by timesteps and by well numbers [timestep, well_number, [i-index], [j-index], [k-index]]
@@ -146,7 +145,6 @@ def readRATE (input_file, nums=[], times=[]):
 
     
     #READ RATES DATA    
-
     leng =(nstr+ncompt+1)*(nphas+2)+2*nstr+4*ncompt+2*ncompt*mwzone # General group data float*4 manual page 11
 
     #buffer arrays for data recording   
@@ -171,8 +169,7 @@ def readRATE (input_file, nums=[], times=[]):
         # reads one timestep
         line = input_file.read(totlen )
 
-        #if n%50==0:
-        #    print("STEP ",n)     # debug output                      
+        #if n%50==0: print("STEP ",n)     # debug output                      
         #print("STEP ",n)
         
         # READ WELL RATES        
@@ -198,7 +195,8 @@ def readRATE (input_file, nums=[], times=[]):
             i_comp = iarr[mwzone*1:mwzone*2] #  get i-index of the current flowing connections
             j_comp = iarr[mwzone*2:mwzone*3] #  get j-index of the current flowing connections
             k_comp = iarr[mwzone*3:mwzone*4] #  get k-index of the current flowing connections
-            perf_array.append([n,j,[*i_comp], [*j_comp], [*k_comp]]) # append current well connections
+            lgr_index = iarr[mwzone*4:mwzone*5] # 0 - global grid, else LGR index
+            perf_array.append([n,j,[*i_comp], [*j_comp], [*k_comp], [*lgr_index]]) # append current well connections
             #print(f"timestep={n}, wellnumber= {j}, block_index={block_index}, comps={[i_comp, j_comp, k_comp]}") # debug
 
 
@@ -302,7 +300,6 @@ def readRATE (input_file, nums=[], times=[]):
                 ResArr[nrate*V*j + nrate*cts.Hopt + n] = ResArr[nrate*V*j + nrate*cts.Hopt + n-1] + ResArr[nrate*V*j + nrate*cts.Hopr + n] * (times[n].tos - times[n-1].tos )/ 1000
                 ResArr[nrate*V*j + nrate*cts.Hwpt + n] = ResArr[nrate*V*j + nrate*cts.Hwpt + n-1] + ResArr[nrate*V*j + nrate*cts.Hwpr + n] * (times[n].tos - times[n-1].tos )/ 1000
                 ResArr[nrate*V*j + nrate*cts.Hwit + n] = ResArr[nrate*V*j + nrate*cts.Hwit + n-1] + ResArr[nrate*V*j + nrate*cts.Hwir + n] * (times[n].tos - times[n-1].tos )/ 1000
-
 
             
         # return array of data read, timesteps converted to array of vectors

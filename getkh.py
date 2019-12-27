@@ -16,6 +16,7 @@ def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections):
 
 def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, times, start_date_array):
     s_d = datetime(start_date_array[2], start_date_array[1], start_date_array[0])
+    #for item in out_arrays: print(item)
 
     # print wells and dates from the request and compose them with indexes of the wells from the model (well_names list)
     wells_dates_from_file = [[ well_names.index(*list(filter(lambda y: y.strip()==x.split()[0], well_names))), x.split()[0], datetime.strptime(' '.join(x.split()[1:]), "%d.%m.%Y %H:%M:%S")] for x in [line.rstrip('\n') for line in open(wells_dates_filename)]]
