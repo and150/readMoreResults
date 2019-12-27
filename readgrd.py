@@ -133,4 +133,5 @@ def read_static_arrays(input_file, out_arrays_names):
             LG_grid_dimensions.append([LG_header[LG]['nxL'], LG_header[LG]['nyL'], LG_header[LG]['nzL']])
 
     #print([main_grid_arrays, LG_grid_arrays_list])
+    print(main_grid_dimensions)
     return [main_grid_arrays, LG_grid_arrays_list, [main_grid_dimensions, LG_grid_dimensions]]

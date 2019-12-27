@@ -16,7 +16,9 @@ def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, t
 
 
     #print(f"Main_arrays\n{out_arrays[0]}")
+    #for item in out_arrays[0]: print(item, )
     #print(f"LG_arrays\n{out_arrays[1]}")
+
     #print( [(item, out_arrays[0][item]) for item in out_arrays[0]]) # debug Main grid arrays printing
     #or lgr in out_arrays[1]: print( [(item, lgr[item]) for item in lgr] ) # debug LG grids arrays printing
     #print(f"grid_dimensions={out_arrays[2]}")
