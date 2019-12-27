@@ -15,6 +15,7 @@ from readgrd  import read_static_arrays
 
 import getkh
 import getwt
+import getipr
 import getit
 import getplt
 import getcpt
@@ -60,6 +61,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("inputfile", help="provides a name of *.mis file to read")
 parser.add_argument("-w","--WT", action="store_true", help ="generates well tests output")
 parser.add_argument("-i","--IT", action="store_true", help ="generates well interferention tests output")
+parser.add_argument("-r","--IPR", action="store_true", help ="generates IPR tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
 parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
 parser.add_argument("-k","--KH", action="store", help ="get perms and h-s from static array file")
@@ -71,46 +73,40 @@ rootName = os.path.basename(args.inputfile).split('.')[0]
 #print(currDir, rootName)
 
 try:
+    """read MORE results """
+    out = readMore(currDir,rootName) # results array
+    startDate, times, numsArray, RateOut = out[0], out[1], out[2], out[3]
+    well_names, perfs_array = RateOut[1], RateOut[2]
 
-
-    # global variables
-    out = []          # results array
-
-    #read MORE results
-    out = readMore(currDir,rootName)
-
-    startDate = out[0]
-    times = out[1]
-    numsArray = out[2]
-    RateOut = out[3]
-    well_names = RateOut[1]
-    perfs_array = RateOut[2]
-
-    if args.CPT!="-999":
-        # crossplot generation 
+    """ crossplot generation """
+    if args.CPT!="-999": 
         getcpt.getCPT(currDir, rootName, startDate, times, numsArray, RateOut, args.CPT)      
 
+    """ well test results output (PI) """
     if args.WT:
-        # well test results output
         getwt.getWT(currDir, rootName, startDate, times, numsArray, RateOut)      
 
+    """ well test results output """
     if args.IT:
-        # well test results output
         getit.getIT(currDir, rootName, startDate, times, numsArray, RateOut)      
         
+    """ well IPR results output (PI) """
+    if args.IPR:
+        getipr.getIPR(currDir, rootName, startDate, times, numsArray, RateOut)      
+
+    """ PLT profiles output """
     if args.PLT:
-        # PLT profiles output 
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
 
+    """ GRID read """
     if args.KH:
-        # GRID read 
-        out_arrays_names = ['DZTV','PERMX', 'PERMY'] #['DZTV','PERMX','PERMY'] 
+        out_arrays_names = ['DZTV','PERMX'] #['DZTV','PERMX','PERMY'] 
         out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
         getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate) 
 
 
+    """ start rates, first year av.rates and cumulatives export """
     if args.AVR:
-        # start rates, first year av.rates and cumulatives export
         getStartRate.getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)
 #    else:
 #        print("no action chosen for {}".format(rootName))
