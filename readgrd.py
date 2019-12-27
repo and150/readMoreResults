@@ -115,18 +115,16 @@ def read_static_arrays(input_file, out_arrays_names):
     #print(f"grd_array_index={grd_array_index}")
 
 
-    # TODO need to be refactored (make one cycle for Main grid and for all LGRs
-    # read requested arrays from main grid
+    # TODO need to be refactored (make one cycle for Main grid and for all LGRs if it is possible...
     out_arrays = []
-    #main_grid_dimensions = [header['nx'], header['ny'], header['nz']]
     grid_dimensions = [[header['nx'], header['ny'], header['nz']]]
+    # read requested arrays from main grid
     main_grid_arrays = {} 
     temp_array = []
     gaps_dict = {}
     for item in grd_array_index:
         del temp_array[:]
         s = f
-        #f = s + grd_array_index[item]*cts.NBREAL
 
         if item.strip() in ['RVOL','XGRI','YGRI','ZGRI']:
             f = s + grd_array_index[item]*cts.NBREAL
@@ -139,12 +137,8 @@ def read_static_arrays(input_file, out_arrays_names):
         if header['activeMaps'] == 1 and item.strip() == 'RVOL':
             gaps_dict = get_null_ranges(read_byte_array(s,f, input_file, 'f'))
 
-
         if item.strip() in out_arrays_names:  # outputs only requested array plus RVOL
             temp_array = read_byte_array(s,f, input_file, 'f')
-            #print(f"before= {temp_array}")
-            #insert_gaps(list(temp_array), gaps_dict)
-            #main_grid_arrays.update({item.strip():[*temp_array]})
             main_grid_arrays.update({item.strip():insert_gaps(list(temp_array), gaps_dict)})
         else:
             input_file.seek(f)
@@ -153,15 +147,13 @@ def read_static_arrays(input_file, out_arrays_names):
 
     #TODO active maps support for LGR (it seems that I'v done it for main grid (need to test)) !!!
     # read requested LGR arrays
-    LG_grid_dimensions = []
-    LG_grid_arrays_list = [] 
     if header['nLG'] > 0:
         for LG in range(header['nLG']):
             LG_grid_arrays = {}
-            #print(f"LGR NAME: {LG_names[LG]}, {LG_header[LG]['nxL']}, {LG_header[LG]['nyL']}, {LG_header[LG]['nzL']}, {LG_header[LG]['Number of active cells']}")
             for item in grd_array_index:
                 del temp_array[:]
                 s = f
+
                 if item.strip() in ['XGRI','YGRI','ZGRI']:
                     f = s + 4*LG_header[LG]['nxL']*LG_header[LG]['nyL']*2*LG_header[LG]['nzL']*cts.NBREAL
                 else:
@@ -173,12 +165,7 @@ def read_static_arrays(input_file, out_arrays_names):
                     LG_grid_arrays.update({item.strip():[*temp_array]})
                 else:
                     input_file.seek(f)
-            LG_grid_arrays_list.append(LG_grid_arrays)
             out_arrays.append(LG_grid_arrays)
-            LG_grid_dimensions.append([LG_header[LG]['nxL'], LG_header[LG]['nyL'], LG_header[LG]['nzL']])
             grid_dimensions.append([LG_header[LG]['nxL'], LG_header[LG]['nyL'], LG_header[LG]['nzL']])
 
-    #print([main_grid_arrays, LG_grid_arrays_list])
-    #for item in out_arrays: print(item)
-    print([out_arrays, grid_dimensions])
-    return [main_grid_arrays, LG_grid_arrays_list, [main_grid_dimensions, LG_grid_dimensions]]
+    return [out_arrays, grid_dimensions]

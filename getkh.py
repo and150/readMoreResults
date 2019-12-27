@@ -1,22 +1,19 @@
 from datetime import  date, datetime, timedelta
 
 def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections):
-    I,J,K = dimensions[0], dimensions[1], dimensions[2]
-    #print(f"I,J,K = {I}, {J}, {K}")
     for item in connections:
-        #print(f"item perf = {item}")
+        I,J,K = dimensions[item[3]][0], dimensions[item[3]][1], dimensions[item[3]][2]
         i,j,k = item[0]-1,item[1]-1,item[2]-1
         if item[0] and item[1] and item[2] > 0:
             print(well_date[0], well_date[1], item[0],item[1],item[2], end=" ")
-            for arr_item in arrays_dict:
-                print(arrays_dict[arr_item][I*J*k + I*j + i], end=" ")
+            for arr_item in arrays_dict[item[3]]:
+                print(arrays_dict[item[3]][arr_item][I*J*k + I*j + i], end=" ")
             print()
 
 
 
 def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, times, start_date_array):
     s_d = datetime(start_date_array[2], start_date_array[1], start_date_array[0])
-    #for item in out_arrays: print(item)
 
     # print wells and dates from the request and compose them with indexes of the wells from the model (well_names list)
     wells_dates_from_file = [[ well_names.index(*list(filter(lambda y: y.strip()==x.split()[0], well_names))), x.split()[0], datetime.strptime(' '.join(x.split()[1:]), "%d.%m.%Y %H:%M:%S")] for x in [line.rstrip('\n') for line in open(wells_dates_filename)]]
@@ -26,12 +23,9 @@ def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, t
     #for item in selected_wells_perfs: print(item)
 
 
-
-    #TODO find out how to distinguish if a well is in LGR and the number of this LGR if any 
     # print connection values
     for perf_item in selected_wells_perfs:
-        get_ijk_values_from_array(out_arrays[0], out_arrays[2][0], perf_item[0:2], list(zip(perf_item[2][2], perf_item[2][3], perf_item[2][4])))
-
+        get_ijk_values_from_array(out_arrays[0], out_arrays[1], perf_item[0:2], list(zip(perf_item[2][2], perf_item[2][3], perf_item[2][4], perf_item[2][5])))
 
 
 
