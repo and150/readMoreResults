@@ -111,8 +111,7 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
     if(tstep_i>=0 and tstep_j>=0):
         for curr_well_name in wellNames:
             curr_well_index = (wellNames.index(curr_well_name))
-            # WQ filter !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if curr_well_name[0:4] == "WQ2-" or curr_well_name == "WQ-11" or curr_well_name == "WQ-13":
+            if curr_well_name[0:4] == "WQ2-" or curr_well_name in ["WQ-11", "WQ-13"]: # !!! WQ filter !!!
                 printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate, tstep_i, cptOutFile, False)
                 printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate_month_behind, tstep_j, cptOutFile)
                 cptOutFile.write('\n')
