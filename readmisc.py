@@ -1,7 +1,6 @@
 #-*- coding:utf-8 -*-
 from getbindata import getBinData
 
-
 def readMISC(input_file):
 # there in not EOS-parameters reading in the current release    
     #######################################################   

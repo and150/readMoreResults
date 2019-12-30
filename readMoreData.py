@@ -1,8 +1,5 @@
 #-*- coding:utf-8 -*-
-import argparse
-import sys
-import os
-import mmap
+import argparse, sys, os, mmap
 import cProfile, pstats, io
 import numpy as np
 
@@ -13,12 +10,8 @@ from readrate import readRATE
 from readgrd  import read_static_arrays
 #from readrt import readRATE 
 
-import getkh
-import getwt
-import getipr
-import getit
-import getplt
-import getcpt
+import getkh, getwt, getipr, getit, getplt, getcpt
+import getgraphs
 import getStartRate
 from printrate import printRate
 
@@ -50,12 +43,9 @@ def read_grd(currDir, rootName, out_arrays_names): # read MORE Grid file
     #return(grd_out)
 
 
-  
-# profiler start
-#pr = cProfile.Profile()
-#pr.enable()
-
-#currDir = os.getcwd()
+'''profiler start'''
+'''pr = cProfile.Profile()
+pr.enable()'''
 
 parser = argparse.ArgumentParser()
 parser.add_argument("inputfile", help="provides a name of *.mis file to read")
@@ -64,7 +54,8 @@ parser.add_argument("-i","--IT", action="store_true", help ="generates well inte
 parser.add_argument("-r","--IPR", action="store_true", help ="generates IPR tests output")
 parser.add_argument("-p","--PLT", action="store_true", help ="generates production logging tests output")
 parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
-parser.add_argument("-k","--KH", action="store", help ="get perms and h-s from static array file")
+parser.add_argument("-k","--KH", action="store", help ="get values for perforated cells of static arrays")
+parser.add_argument("-g","--GRAPHS", action="store_true", help ="generates output graphs")
 parser.add_argument("-a","--AVR", action="store_true", help ="generates start oil rates, average oil rates for the first year of production and cumulatieves")
 args = parser.parse_args()
 
@@ -97,6 +88,10 @@ try:
     """ PLT profiles output """
     if args.PLT:
         getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
+        
+    """ GRAPHS output """
+    if args.GRAPHS:
+        getgraphs.get_graphs(currDir, rootName, startDate, times, numsArray, RateOut)
 
     """ GRID read """
     if args.KH:
@@ -115,12 +110,13 @@ try:
 
     #printRate(times, numsArray, RateOut) 
     #print(time.time()-stime)
-    # profiler parameters output
-    #pr.disable()
-    #s = io.StringIO()   
-    #ps = pstats.Stats(pr, stream = s)
-    #ps.print_stats()
-    #print(s.getvalue())
+
+    ''' profiler parameters output'''
+    '''pr.disable()
+    s = io.StringIO()   
+    ps = pstats.Stats(pr, stream = s)
+    ps.print_stats()
+    print(s.getvalue())'''
 
 except IOError as Argument:
     print("Error: ", Argument)

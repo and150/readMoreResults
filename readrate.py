@@ -1,13 +1,9 @@
 #-*- coding:utf-8 -*-
-import array
-import struct
+import array, struct
 from getbindata import getBinData
 import constants as cts
- 
-def readRATE (input_file, nums=[], times=[]):
-    # nums[] - addresses array
-    # nrate - amount of timesteps in rate-input_file
 
+def readRATE (input_file, nums=[], times=[]):
     class RatesHeader:
     # local class of 1-st time step header    
         def __init__(self, mnem="", units="", asname="", descr="", ASIND = [], ASDEPTH = []):    
@@ -25,7 +21,6 @@ def readRATE (input_file, nums=[], times=[]):
             # 7 Ц Associated second fluid in place region(for inter-region flows)
             # 8-16 are not currently used
             self.ASDEPTH = ASDEPTH # Associated depth array (real)
-       
         def getData(self, bts): #!!! used constant byte positions 16 32 48 96 160 !!!
             self.mnem   = str(b''.join(struct.unpack('c'*16,bts[0:16])), 'utf-8') #block[0:16].decode("utf-8")    
             self.units  = str(b''.join(struct.unpack('c'*16,bts[16:32])), 'utf-8') #block[16:32].decode("utf-8")
@@ -37,7 +32,6 @@ def readRATE (input_file, nums=[], times=[]):
                 self.ASIND.append(int.from_bytes(bts[96+i*4:96+i*4+4],'little',signed='true'))
             for i in range(0,4):
                 self.ASDEPTH.append(struct.unpack('f',bts[160+i*4:160+i*4+4])[0] )            
-
         def printRatesHeader(self):
             print(self.mnem)
             print(self.units)
@@ -47,7 +41,6 @@ def readRATE (input_file, nums=[], times=[]):
             print(self.ASDEPTH)    
 
 
-    #######################################################
     #get data from num array
     ncompt = nums[2-1]  # Total number of components
     mw = nums[3-1]      # Maximum number of wells
@@ -62,20 +55,19 @@ def readRATE (input_file, nums=[], times=[]):
     nqchar = nums[39-1]   # Number of characters associated with each rate quantity
     nqinte = nums[40-1]   # Number of integers associated with each rate quantity
     nqreal = nums[41-1]   # Number of reals associated with each rate quantity
-    NIIRATE = nums[47-1]  # Number of items of IRATE data (21)    по нумс - 21
-    NIIRPTR =  nums[48-1] # Number of items of IPPTR data (10)    по нумс - 12
-    NIWRATE = nums[49-1]  # Number of items of WRATE data (22)    по нумс -23
-    NIWMCMP = nums[50-1]  # Number of items of WMCMP data (4)   по файлу 4 
-    NIWVCMP = nums[51-1]  # Number of items of WVCMP data (15)   по файлу 15
-    NIWVLAY = nums[52-1]  # Number of items of WVLAY data (15)  по файлу 15
-    NIGRVOL = nums[53-1]  # Number of items of GRVOL data (5) по файлу 5
-    NIGVLAY = nums[54-1]  # Number of items of GVLAY data (18) по файлу 18
+    NIIRATE = nums[47-1]  # Number of items of IRATE data (21)
+    NIIRPTR =  nums[48-1] # Number of items of IPPTR data (10)    by nums - 12
+    NIWRATE = nums[49-1]  # Number of items of WRATE data (22)    by nums -23
+    NIWMCMP = nums[50-1]  # Number of items of WMCMP data (4)
+    NIWVCMP = nums[51-1]  # Number of items of WVCMP data (15)
+    NIWVLAY = nums[52-1]  # Number of items of WVLAY data (15)
+    NIGRVOL = nums[53-1]  # Number of items of GRVOL data (5)
+    NIGVLAY = nums[54-1]  # Number of items of GVLAY data (18)
     IWVCMP = nums[55-1]   # Set to 1 if WVCMP written out, 0 otherwise
     IWVLAY = nums[56-1]   # Set to 1 if WVLAY written out, 0 otherwise   
 
     mstr = 5 # manual page 10
 
-    #######################################################
 
     #READ HEADER DATA
     nbi =  cts.NBINT # number of bytes in integer
@@ -305,9 +297,5 @@ def readRATE (input_file, nums=[], times=[]):
         # return array of data read, timesteps converted to array of vectors
     #return Items
     input_file.close()
-
     #[print(f"timestep={item[0]} well_num={item[1]} i-index={item[2]} j-index={item[3]} k-index={item[4]}") for item in perf_array] # debug
-
     return (ResArr, WNAMES, perf_array)
-
-
