@@ -12,7 +12,7 @@ def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections, o
 
 
 
-def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, times, start_date_array, out_file):
+def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, times, start_date_array, out_file):  # gets values only for perforated cells (perfs from rate-file)
     s_d = datetime(start_date_array[2], start_date_array[1], start_date_array[0])
 
     ''' print wells and dates from the request and compose them with indexes of the wells from the model (well_names list)'''
@@ -21,7 +21,6 @@ def get_wells_cells(out_arrays, wells_dates_filename, well_names, times_perfs, t
 
     selected_wells_perfs = list( [well_date[1], well_date[2], *list(filter(lambda time_perf: well_date[0]==time_perf[1] and well_date[2]==s_d+timedelta(days=times[time_perf[0]]), times_perfs))] for well_date in wells_dates_from_file)
     #for item in selected_wells_perfs: print(item) # debug
-
 
     ''' print connection values'''
     for perf_item in selected_wells_perfs:
