@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
+import matplotlib.dates as md
 import matplotlib.pyplot as plt
 
 
@@ -23,10 +24,13 @@ def make_graph(well_name, x_values, ys_values):
     par2.axis["right"].toggle(all=True)
 
     # TODO make function to calculate limits (check defaults, than calculate custom)
+    host.get_xaxis().set_major_locator(md.YearLocator())
+    host.get_xaxis().set_major_formatter(md.DateFormatter("%d.%m.%Y"))
     host.set_ylim(0,1000)
     par1.set_ylim(0,1000)
     par2.set_ylim(0,100)
 
+    plt.title(f"{well_name}")
     host.set_xlabel("Date")
     host.set_ylabel("P, barsa")
     par1.set_ylabel("Q, sm3/day")
@@ -47,7 +51,7 @@ def make_graph(well_name, x_values, ys_values):
     # TODO find out how to obtain wPI4 values
 
     # TODO find out how to show a legend
-    host.legend(bbox_to_anchor=(0.0, 0.0),loc='lower left', ncol=8, mode="expand")
+    host.legend(bbox_to_anchor=(0.0, -0.4, 1.0, 0.3), ncol=4, mode="expand", columnspacing=1.0)
 
     #plt.show()
     plt.savefig(well_name+'_graph.png', bbox_inches='tight')
