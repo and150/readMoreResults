@@ -102,6 +102,7 @@ def readRATE (input_file, nums=[], times=[]):
     qwirh = [-1]*mw      
     qwefa = [-1]*mw      
     qthph = [-1]*mw
+    wPI4 = [-1]*mw
 
     #read quantity data (Mnemonics, Units, Associated names, Descriptions) !!!need check!!!!
     HARR = [] # array of vectors' headers (additional vectors miscellaneous
@@ -121,6 +122,7 @@ def readRATE (input_file, nums=[], times=[]):
             if (HARR[i].mnem.strip() == "wbhph" and HARR[i].asname.strip() == WNAMES[j].strip()): qbhph[j] = i              
             if (HARR[i].mnem.strip() == "wefa"  and HARR[i].asname.strip() == WNAMES[j].strip()): qwefa[j] = i              
             if (HARR[i].mnem.strip() == "wthph" and HARR[i].asname.strip() == WNAMES[j].strip()): qthph[j] = i              
+            if (HARR[i].mnem.strip() == "wPI4" and HARR[i].asname.strip() == WNAMES[j].strip()): wPI4[j] = i              
             #print(HARR[i].mnem.strip() + " |" + HARR[i].asname.strip()+ "| "+ str(i) + " "+ str(j)+" |" +WNAMES[j].strip()+"| ")
 
     #### debug print ####
@@ -202,8 +204,8 @@ def readRATE (input_file, nums=[], times=[]):
             f = s + NIWRATE*nbf
             farr.frombytes(line[s:f])      
             #print(farr)
-            ResArr[nrate*V*j + nrate* cts.Sbhp + n] = farr[3]        # get bottom hole pressure referenced
-            ResArr[nrate*V*j + nrate* cts.Sthp + n] = farr[9]        # get tubing head pressure
+            ResArr[nrate*V*j + nrate* cts.i_d['Sbhp'] + n] = farr[3]        # get bottom hole pressure referenced
+            ResArr[nrate*V*j + nrate* cts.i_d['Sthp'] + n] = farr[9]        # get tubing head pressure
            
 
             # wrvol    # Well volume rates and totals  float*4
@@ -212,14 +214,14 @@ def readRATE (input_file, nums=[], times=[]):
             f = s + 3*mstr*nbf
             farr.frombytes(line[s:f])   
             #print(farr)
-            ResArr[nrate*V*j + nrate* cts.Sopr + n] = farr[0]   # get oil rate
-            ResArr[nrate*V*j + nrate* cts.Sopt + n] = farr[5]   # get cumulative oil for producers
-            ResArr[nrate*V*j + nrate* cts.Swpt + n] = farr[7]   # get cumulative water for producers
+            ResArr[nrate*V*j + nrate* cts.i_d['Sopr'] + n] = farr[0]   # get oil rate
+            ResArr[nrate*V*j + nrate* cts.i_d['Sopt'] + n] = farr[5]   # get cumulative oil for producers
+            ResArr[nrate*V*j + nrate* cts.i_d['Swpt'] + n] = farr[7]   # get cumulative water for producers
             if(wtype[j] == 1): 
-                ResArr[nrate*V*j + nrate* cts.Swpr + n] = farr[2]   # get water rate for producers
+                ResArr[nrate*V*j + nrate* cts.i_d['Swpr'] + n] = farr[2]   # get water rate for producers
             elif(wtype[j]==-1):
-                ResArr[nrate*V*j + nrate* cts.Swir + n] = farr[1]   # injectivity (water rate) for injectors
-                ResArr[nrate*V*j + nrate* cts.Swit + n] = farr[11]   # get cumulative injection for injectors
+                ResArr[nrate*V*j + nrate* cts.i_d['Swir'] + n] = farr[1]   # injectivity (water rate) for injectors
+                ResArr[nrate*V*j + nrate* cts.i_d['Swit'] + n] = farr[11]   # get cumulative injection for injectors
            
 
             # wrms         # Well molar rates and totals      float*4
@@ -277,21 +279,22 @@ def readRATE (input_file, nums=[], times=[]):
         #print(farr)
         # read miscellaneous vectors (history vectors)
         for j in range(0,mw):
-            if(qoprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hopr + n] = farr[qoprh[j]] # get history oil rates if any
-            if(qwprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwpr + n] = farr[qwprh[j]] # get history water rates if any
-            if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*cts.Hwir + n] = farr[qwirh[j]]  # ACHTUNG!!, if there is injection it is written instead of water rate
-            if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hbhp + n] = farr[qbhph[j]] # get history bhp if any 
-            if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hwefa + n] = farr[qwefa[j]] # get history wefa if any 
-            if(qthph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.Hthp + n] = farr[qthph[j]] # get history bhp if any 
+            if(qoprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['Hopr'] + n] = farr[qoprh[j]] # get history oil rates if any
+            if(qwprh[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['Hwpr'] + n] = farr[qwprh[j]] # get history water rates if any
+            if(qwirh[j] >= 0 and wtype[j] == -1 ): ResArr[nrate*V*j + nrate*cts.i_d['Hwir'] + n] = farr[qwirh[j]]  # ACHTUNG!!, if there is injection it is written instead of water rate
+            if(qbhph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['Hbhp'] + n] = farr[qbhph[j]] # get history bhp if any 
+            if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['Hwefa'] + n] = farr[qwefa[j]] # get history wefa if any 
+            if(qthph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['Hthp'] + n] = farr[qthph[j]] # get history bhp if any 
+            if(wPI4[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['wPI4'] + n] = farr[wPI4[j]] # get wPI4 if any
             # calculation of history cumulatives
             if(n==0):
-                ResArr[nrate*V*j + nrate*cts.Hopt + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hopr + n] * times[n].tos / 1000
-                ResArr[nrate*V*j + nrate*cts.Hwpt + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hwpr + n] * times[n].tos / 1000
-                ResArr[nrate*V*j + nrate*cts.Hwit + n] = 0 + ResArr[nrate*V*j + nrate*cts.Hwir + n] * times[n].tos / 1000
+                ResArr[nrate*V*j + nrate*cts.i_d['Hopt'] + n] = 0 + ResArr[nrate*V*j + nrate*cts.i_d['Hopr'] + n] * times[n].tos / 1000
+                ResArr[nrate*V*j + nrate*cts.i_d['Hwpt'] + n] = 0 + ResArr[nrate*V*j + nrate*cts.i_d['Hwpr'] + n] * times[n].tos / 1000
+                ResArr[nrate*V*j + nrate*cts.i_d['Hwit'] + n] = 0 + ResArr[nrate*V*j + nrate*cts.i_d['Hwir'] + n] * times[n].tos / 1000
             else:
-                ResArr[nrate*V*j + nrate*cts.Hopt + n] = ResArr[nrate*V*j + nrate*cts.Hopt + n-1] + ResArr[nrate*V*j + nrate*cts.Hopr + n] * (times[n].tos - times[n-1].tos )/ 1000
-                ResArr[nrate*V*j + nrate*cts.Hwpt + n] = ResArr[nrate*V*j + nrate*cts.Hwpt + n-1] + ResArr[nrate*V*j + nrate*cts.Hwpr + n] * (times[n].tos - times[n-1].tos )/ 1000
-                ResArr[nrate*V*j + nrate*cts.Hwit + n] = ResArr[nrate*V*j + nrate*cts.Hwit + n-1] + ResArr[nrate*V*j + nrate*cts.Hwir + n] * (times[n].tos - times[n-1].tos )/ 1000
+                ResArr[nrate*V*j + nrate*cts.i_d['Hopt'] + n] = ResArr[nrate*V*j + nrate*cts.i_d['Hopt'] + n-1] + ResArr[nrate*V*j + nrate*cts.i_d['Hopr'] + n] * (times[n].tos - times[n-1].tos )/ 1000
+                ResArr[nrate*V*j + nrate*cts.i_d['Hwpt'] + n] = ResArr[nrate*V*j + nrate*cts.i_d['Hwpt'] + n-1] + ResArr[nrate*V*j + nrate*cts.i_d['Hwpr'] + n] * (times[n].tos - times[n-1].tos )/ 1000
+                ResArr[nrate*V*j + nrate*cts.i_d['Hwit'] + n] = ResArr[nrate*V*j + nrate*cts.i_d['Hwit'] + n-1] + ResArr[nrate*V*j + nrate*cts.i_d['Hwir'] + n] * (times[n].tos - times[n-1].tos )/ 1000
 
             
         # return array of data read, timesteps converted to array of vectors

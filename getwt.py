@@ -35,25 +35,25 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                 outFile.write("WT=" + str(x.wt)+ " ")                            # test number
                 outStr = str(times[i].tos) +" " + str(wellNames[wi]+" "); outFile.write(outStr) # time and well name
 
-                outFile.write(str(ResArr[T*V*wi + T* cts.Sbhp + i])); outFile.write(" ")  # simulated BHP
-                outFile.write(str(ResArr[T*V*wi + T* cts.Sopr + i])); outFile.write(" ")  # simulatdd oil rate
-                outFile.write(str(ResArr[T*V*wi + T* cts.Swpr + i] + ResArr[T*V*wi + T* cts.Swir + i])); outFile.write(" ")  # simulated water rate (injection)
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Sbhp'] + i])); outFile.write(" ")  # simulated BHP
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Sopr'] + i])); outFile.write(" ")  # simulatdd oil rate
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Swpr'] + i] + ResArr[T*V*wi + T* cts.i_d['Swir'] + i])); outFile.write(" ")  # simulated water rate (injection)
 
-                outFile.write(str(ResArr[T*V*wi + T* cts.Hbhp + i])); outFile.write(" ")  # historic BHP
-                outFile.write(str(ResArr[T*V*wi + T* cts.Hopr + i])); outFile.write(" ")  # historic oil rate
-                outFile.write(str(ResArr[T*V*wi + T* cts.Hwpr + i] + ResArr[T*V*wi + T* cts.Hwir + i])); outFile.write(" ")  # historic water rate + injection
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Hbhp'] + i])); outFile.write(" ")  # historic BHP
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Hopr'] + i])); outFile.write(" ")  # historic oil rate
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Hwpr'] + i] + ResArr[T*V*wi + T* cts.i_d['Hwir'] + i])); outFile.write(" ")  # historic water rate + injection
                 
 
                 # get PBU and print parameters to *.WTout
                 # PBU rates calculation
-                currLiq  = ResArr[T*V*wi + T* cts.Sopr + i] + ResArr[T*V*wi + T* cts.Swpr + i] + ResArr[T*V*wi + T* cts.Swir + i]# current simulated liquid rate
-                currLiqH = ResArr[T*V*wi + T* cts.Hopr + i] + ResArr[T*V*wi + T* cts.Hwpr + i] + ResArr[T*V*wi + T* cts.Hwir + i]# current historic liquid rate
+                currLiq  = ResArr[T*V*wi + T* cts.i_d['Sopr'] + i] + ResArr[T*V*wi + T* cts.i_d['Swpr'] + i] + ResArr[T*V*wi + T* cts.i_d['Swir'] + i]# current simulated liquid rate
+                currLiqH = ResArr[T*V*wi + T* cts.i_d['Hopr'] + i] + ResArr[T*V*wi + T* cts.i_d['Hwpr'] + i] + ResArr[T*V*wi + T* cts.i_d['Hwir'] + i]# current historic liquid rate
 
-                #currOil  = ResArr[T*V*wi + T* cts.Sopr + i] # current simulated oil rate
-                #currOilH = ResArr[T*V*wi + T* cts.Hopr + i] # current actual oil rate
+                #currOil  = ResArr[T*V*wi + T* cts.i_d['Sopr'] + i] # current simulated oil rate
+                #currOilH = ResArr[T*V*wi + T* cts.i_d['Hopr'] + i] # current actual oil rate
 
-                currP  = ResArr[T*V*wi + T* cts.Sbhp + i]   # simulatde BHP
-                currPH = ResArr[T*V*wi + T* cts.Hbhp + i]   # historic BHP
+                currP  = ResArr[T*V*wi + T* cts.i_d['Sbhp'] + i]   # simulatde BHP
+                currPH = ResArr[T*V*wi + T* cts.i_d['Hbhp'] + i]   # historic BHP
                 maxP = currP
                 maxPH = currPH
                 if currP <= cts.PTOL or currPH <= cts.PTOL :
@@ -63,7 +63,7 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                     maxP = currP
                     maxPH = currPH
 
-                if i<=len(times):  nextLiq = ResArr[T*V*wi + T* cts.Sopr + i+1] + ResArr[T*V*wi + T* cts.Swpr + i+1]+ ResArr[T*V*wi + T* cts.Swir + i+1] # next simulated liquid rate
+                if i<=len(times):  nextLiq = ResArr[T*V*wi + T* cts.i_d['Sopr'] + i+1] + ResArr[T*V*wi + T* cts.i_d['Swpr'] + i+1]+ ResArr[T*V*wi + T* cts.i_d['Swir'] + i+1] # next simulated liquid rate
                 else: nextLiq = currLiq
     
                 if(currLiq > liqCut):   # check intervals with non-zero rate
@@ -72,8 +72,8 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
                         PBUstr = PBUstr + x.well + " " + str(times[i].tos) # name of the well and PBU start time
                         PBUstr = PBUstr + " " + str(currLiq) + " " + str(currLiqH) # simulated and historic rates(injectivities) of liquid
                         ###PBUstr = PBUstr + " " + str(currOil) + " " + str(currOilH) # simulated and historic oil rates
-                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Sbhp + i]) # simulated BHP
-                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.Hbhp + i])  # historic BHP
+                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.i_d['Sbhp'] + i]) # simulated BHP
+                        PBUstr = PBUstr + " " + str(ResArr[T*V*wi + T* cts.i_d['Hbhp'] + i])  # historic BHP
                 else:
                     outFile.write(" static")                    
                     if(nextLiq > liqCut): 

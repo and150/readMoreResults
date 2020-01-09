@@ -12,29 +12,29 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
     outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[tstep_i].tos))  # date and time
     outFile.write('{0:s} '.format(curr_well_name) ) # well name
     
-    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sopt + tstep_i]) )  # simulated cumulative oil
-    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hopt + tstep_i]) )  # historic cumulative oil
+    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Sopt'] + tstep_i]) )  # simulated cumulative oil
+    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hopt'] + tstep_i]) )  # historic cumulative oil
 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swit + tstep_i]) )  # simulated cumulative injection
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwit + tstep_i]) )  # historic cumulative injection
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Swit'] + tstep_i]) )  # simulated cumulative injection
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hwit'] + tstep_i]) )  # historic cumulative injection
 
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Swpt + tstep_i]) )  # simulated cumulative water
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hwpt + tstep_i]) )  # historic cumulative water
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Swpt'] + tstep_i]) )  # simulated cumulative water
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hwpt'] + tstep_i]) )  # historic cumulative water
 
 
 
     def get_last_defined_bhp(ResArr, T, V, curr_well_index, tstep_i):
         search_tstep_i = tstep_i
         while search_tstep_i > 0:
-            if ResArr[T*V*curr_well_index + T*cts.Hbhp + search_tstep_i] > cts.PTOL:
-                return [ResArr[T*V*curr_well_index + T*cts.Sbhp + search_tstep_i], 
-                        ResArr[T*V*curr_well_index + T*cts.Hbhp + search_tstep_i], 
+            if ResArr[T*V*curr_well_index + T*cts.i_d['Hbhp'] + search_tstep_i] > cts.PTOL:
+                return [ResArr[T*V*curr_well_index + T*cts.i_d['Sbhp'] + search_tstep_i], 
+                        ResArr[T*V*curr_well_index + T*cts.i_d['Hbhp'] + search_tstep_i], 
                         search_tstep_i]
             search_tstep_i -= 1
 
         # if something wrong... just return original timestep values
-        return [ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i], 
-                ResArr[T*V*curr_well_index + T*cts.Hbhp + tstep_i], 
+        return [ResArr[T*V*curr_well_index + T*cts.i_d['Sbhp'] + tstep_i], 
+                ResArr[T*V*curr_well_index + T*cts.i_d['Hbhp'] + tstep_i], 
                 tstep_i]
 
     # find the latest defined BHP if not defined on the CPT date
@@ -45,17 +45,17 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
         #outFile.write(f'{times[latest_defined_pressures[2]].tos} ' )  # debug output of the last defined BHP
 
         # print THP (TO DO find latest_defined TH pressure)
-        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Sthp + tstep_i]:5.3f} ')  # simulated THP
-        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Hthp + tstep_i]:5.3f} ')  # historic THP
+        outFile.write(f"{ResArr[T*V*curr_well_index + T*cts.i_d['Sthp'] + tstep_i]:5.3f} ")  # simulated THP
+        outFile.write(f"{ResArr[T*V*curr_well_index + T*cts.i_d['Hthp'] + tstep_i]:5.3f} ")  # historic THP
 
     # print BHP on the CPT date (might be undefined if a gauge has been removed) 
     else:
-        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Sbhp + tstep_i]) )  # simulated BHP
-        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.Hbhp + tstep_i]) )  # historic BHP
+        outFile.write("{0:5.3f} ".format(ResArr[T*V*curr_well_index + T*cts.i_d['Sbhp'] + tstep_i]) )  # simulated BHP
+        outFile.write("{0:5.3f} ".format(ResArr[T*V*curr_well_index + T*cts.i_d['Hbhp'] + tstep_i]) )  # historic BHP
 
         # print THP
-        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Sthp + tstep_i]:5.3f} ')  # simulated THP
-        outFile.write(f'{ResArr[T*V*curr_well_index + T*cts.Hthp + tstep_i]:5.3f} ')  # historic THP
+        outFile.write(f"{ResArr[T*V*curr_well_index + T*cts.i_d['Sthp'] + tstep_i]:5.3f} ")  # simulated THP
+        outFile.write(f"{ResArr[T*V*curr_well_index + T*cts.i_d['Hthp'] + tstep_i]:5.3f} ")  # historic THP
 
 # function gets date-time and returns timestep number or -1 if date-time not found
 def getTimeStepNumber(times, startDate, stringDate="01.01.1900 00:00:00"):
@@ -138,35 +138,27 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
 #
 #                   print('{0:s}'.format(x), end = ' ') #
 #                   
-#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Sopt + i]), end = ' ')  #
-#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.Hopt + i]), end = ' ')  #
+#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.i_d['Sopt'] + i]), end = ' ')  #
+#                   print('{0:3f}'.format(ResArr[T*V*wi + T*cts.i_d['Hopt'] + i]), end = ' ')  #
 #
 #                   print(' ',end=' ')
 #
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swit + i]), end = ' ')  # 
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwit + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.i_d['Swit'] + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.i_d['Hwit'] + i]), end = ' ')  # 
 #
 #                   print(' ',end=' ')
 #
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Swpt + i]), end = ' ')  # 
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hwpt + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.i_d['Swpt'] + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.i_d['Hwpt'] + i]), end = ' ')  # 
 #                   
 #                   print(' ',end=' ')
 #
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Sbhp + i]), end = ' ')  # 
-#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.Hbhp + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.i_d['Sbhp'] + i]), end = ' ')  # 
+#                   print('{0:5.3f}'.format(ResArr[T*V*wi + T*cts.i_d['Hbhp'] + i]), end = ' ')  # 
 #                   
 #                   print()
 #
 #           else:
 #               print("{0:s} - no such date".format(line.strip('\n')))
-
-
         
-
 #    dateList.close()
-
-
-
-
-

@@ -16,26 +16,26 @@ def getStartOilRate(ResArr, times, T, V, wi, i):
     time1 = 0
     period = 365
 
-    cumOil = ResArr[T*V*wi + T*cts.Sopt + len(times)-1]
+    cumOil = ResArr[T*V*wi + T*cts.i_d['Sopt'] + len(times)-1]
 
     for i in range(1, len(times)):
 
-        if(startTrig==0 and ResArr[T*V*wi + T*cts.Sopr + i] >0):
+        if(startTrig==0 and ResArr[T*V*wi + T*cts.i_d['Sopr'] + i] >0):
             startTrig = 1
-            startOilRate = ResArr[T*V*wi + T*cts.Sopr + i]  
+            startOilRate = ResArr[T*V*wi + T*cts.i_d['Sopr'] + i]  
 
-        if(ResArr[T*V*wi + T*cts.Sopr + i-1] == 0 and  ResArr[T*V*wi + T*cts.Sopr + i] >0 ):
-            cumOil1 = ResArr[T*V*wi + T*cts.Sopr + i]
+        if(ResArr[T*V*wi + T*cts.i_d['Sopr'] + i-1] == 0 and  ResArr[T*V*wi + T*cts.i_d['Sopr'] + i] >0 ):
+            cumOil1 = ResArr[T*V*wi + T*cts.i_d['Sopr'] + i]
             time1 = times[i].tos
 
         if(times[i].tos - time1 >= period):
-            avRate = (ResArr[T*V*wi + T*cts.Sopt + i] - cumOil1) / (times[i].tos - time1) * 1000
+            avRate = (ResArr[T*V*wi + T*cts.i_d['Sopt'] + i] - cumOil1) / (times[i].tos - time1) * 1000
 
     return [startOilRate, avRate, cumOil]
 
 
 
-    ResArr[T*V*wi + T*cts.Sopt + i] 
+    ResArr[T*V*wi + T*cts.i_d['Sopt'] + i] 
 
 
 # function prints information for cross-plots

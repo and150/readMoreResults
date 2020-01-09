@@ -33,10 +33,10 @@ def getIPR(currDir, rootName, start_date_array, times, numsArray, RateOut):
         for date_time in ipr_dict[ipr_item]:
             i =[datetime(t.year, t.month, t.day, t.hour, t.minute, t.second) for t in [s_d+timedelta(days=x.tos) for x in times]].index(date_time) # get time index
 
-            Q_sim  = ResArr[T*V*wi+T*cts.Sopr+i]+ResArr[T*V*wi+T*cts.Swpr+i]+ResArr[T*V*wi+T*cts.Swir+i]  # simulated oil + water+injection rate 
-            Q_hist = ResArr[T*V*wi+T*cts.Hopr+i]+ResArr[T*V*wi+T*cts.Hwpr+i]+ResArr[T*V*wi+T*cts.Hwir+i]  # historic oil + water+injection rate
-            P_sim  = ResArr[T*V*wi+T*cts.Sbhp+i]  # simulated BHP
-            P_hist = ResArr[T*V*wi+T*cts.Hbhp+i]  # historic BHP
+            Q_sim  = ResArr[T*V*wi+T*cts.i_d['Sopr']+i]+ResArr[T*V*wi+T*cts.i_d['Swpr']+i]+ResArr[T*V*wi+T*cts.i_d['Swir']+i]  # simulated oil + water+injection rate 
+            Q_hist = ResArr[T*V*wi+T*cts.i_d['Hopr']+i]+ResArr[T*V*wi+T*cts.i_d['Hwpr']+i]+ResArr[T*V*wi+T*cts.i_d['Hwir']+i]  # historic oil + water+injection rate
+            P_sim  = ResArr[T*V*wi+T*cts.i_d['Sbhp']+i]  # simulated BHP
+            P_hist = ResArr[T*V*wi+T*cts.i_d['Hbhp']+i]  # historic BHP
 
             if ipr_item in ipr_dict_for_regr:
                 ipr_dict_for_regr[ipr_item][0].append(Q_sim)

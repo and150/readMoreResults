@@ -31,13 +31,13 @@ def getIT(currDir, rootName, startDate, times, numsArray, RateOut):
                 outFile.write("IT=" + str(x.wt)+ " ")                            # test number
                 outStr = str(times[i].tos) +" " + str(wellNames[wi]+" "); outFile.write(outStr) # time and well name
 
-                outFile.write(str(ResArr[T*V*wi + T* cts.Sbhp + i])); outFile.write(" ")  # simulated BHP
-                outFile.write(str(ResArr[T*V*wi + T* cts.Sopr + i])); outFile.write(" ")  # simulatdd oil rate
-                outFile.write(str(ResArr[T*V*wi + T* cts.Swpr + i] + ResArr[T*V*wi + T* cts.Swir + i])); outFile.write(" ")  # simulated water rate (injection)
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Sbhp'] + i])); outFile.write(" ")  # simulated BHP
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Sopr'] + i])); outFile.write(" ")  # simulatdd oil rate
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Swpr'] + i] + ResArr[T*V*wi + T* cts.i_d['Swir'] + i])); outFile.write(" ")  # simulated water rate (injection)
 
-                outFile.write(str(ResArr[T*V*wi + T* cts.Hbhp + i])); outFile.write(" ")  # historic BHP
-                outFile.write(str(ResArr[T*V*wi + T* cts.Hopr + i])); outFile.write(" ")  # historic oil rate
-                outFile.write(str(ResArr[T*V*wi + T* cts.Hwpr + i] + ResArr[T*V*wi + T* cts.Hwir + i])); outFile.write(" ")  # historic water rate + injection
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Hbhp'] + i])); outFile.write(" ")  # historic BHP
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Hopr'] + i])); outFile.write(" ")  # historic oil rate
+                outFile.write(str(ResArr[T*V*wi + T* cts.i_d['Hwpr'] + i] + ResArr[T*V*wi + T* cts.i_d['Hwir'] + i])); outFile.write(" ")  # historic water rate + injection
 
-                outFile.write(str(ResArr[T*V*wi_disturb + T* cts.Hwpr + i] + ResArr[T*V*wi_disturb + T* cts.Hwir + i]))   # injection of disturbing well 
+                outFile.write(str(ResArr[T*V*wi_disturb + T* cts.i_d['Hwpr'] + i] + ResArr[T*V*wi_disturb + T* cts.i_d['Hwir'] + i]))   # injection of disturbing well 
     outFile.close()
