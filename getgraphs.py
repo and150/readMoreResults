@@ -9,6 +9,44 @@ import matplotlib.dates as md
 import matplotlib.pyplot as plt
 
 
+def get_statistics(stat_file, well_name):
+    pass
+'''
+import os
+import argparse
+from openpyxl import load_workbook
+from openpyxl import Workbook
+
+TB_WIDTH = 22
+TB_START_ROW = 23
+
+parser = argparse.ArgumentParser()
+parser.add_argument("inputfile", help="provides a name of results file to read")
+args = parser.parse_args()
+
+currDir = os.path.dirname( os.path.abspath(args.inputfile))
+fileName = os.path.basename(args.inputfile)
+
+try:
+    wb = load_workbook(currDir+"\\"+fileName, data_only=True)
+    ws = wb['stat_ext'] 
+
+    #header = [ws.cell(TB_START_ROW,col).value for col in range(1,TB_WIDTH)] # no replacing Delta
+    header = [ ''.join( 'd' if x=='\u0394' else x for x in list(ws.cell(TB_START_ROW,col).value)) for col in range(1,TB_WIDTH)]
+    print(header)
+
+    row = TB_START_ROW+1
+    while ws.cell(row, 1).value:
+        data_record = [ws.cell(row,col).value for col in range(1,TB_WIDTH)] 
+        #print(data_record)
+        row+=1
+
+except IOError as Argument:
+    print("Error: ", Argument)
+'''
+
+
+
 def make_graph(root_name, well_name, x_values, ys_values):
     host = host_subplot(111, axes_class=AA.Axes)
     #plt.subplots(figsize=(20,10))
