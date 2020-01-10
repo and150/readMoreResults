@@ -38,12 +38,7 @@ def make_graph(root_name, well_name, x_values, ys_values):
     wPI_lim = max(ys_values['wPI4']) 
     if wPI_lim > 10000: wPI_lim = statistics.median(ys_values['wPI4']) + 1000 
 
-    # TODO make function to set dates range (find date when a well starts to produce)
-    host.set_xlim(datetime(2014, 1, 1), x_values[-1])
-    #print(x_values[0])
-    #print(datetime(2014,3,3))
-    #host.set_xlim(, x_values[-1])
-
+    host.set_xlim(x_values[next((x for x,y in enumerate(ys_values['Hliq']) if y) ,0)], x_values[-1]) # set datetime limits
     host.set_ylim(0,pres_lim) # pressure
     par1.set_ylim(0,liq_lim) # liquid and injection
     par2.set_ylim(0,100) # wcut
@@ -55,7 +50,6 @@ def make_graph(root_name, well_name, x_values, ys_values):
     par1.set_ylabel("Q, sm3/day")
     par2.set_ylabel("WCT, %")
     par3.set_ylabel("WPI")
-
 
     host.plot(x_values, ys_values['Sbhp'], '-', color='black', label="WBHP", linewidth=0.8, zorder=10) # BHP
     host.plot(x_values, ys_values['Hbhp'], '.', markersize=4, color='red', label="WBHPH", zorder=0) # BHPH
@@ -73,8 +67,8 @@ def make_graph(root_name, well_name, x_values, ys_values):
 
     host.legend(bbox_to_anchor=(0.0, -0.4, 1.0, 0.3), ncol=5, mode="expand", columnspacing=1.0)
 
-    #plt.show()
-    plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight')
+    # TODO save pictures into pptx file
+    plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight') # plt.show()
     plt.close()
 
 
@@ -91,8 +85,8 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     x_values = [s_d+timedelta(days=x.tos) for x in times]
     y_values = {} 
 
-    #for well_name in RateOut[1]: # no filters
-    for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter
+    for well_name in RateOut[1]: # no filters
+    #for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
@@ -107,7 +101,6 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
             hist_wcut = 0
             if  RateOut[0][T*V*wi+T*cts.i_d['Hopr']+i]==0 and RateOut[0][T*V*wi+T*cts.i_d['Hwpr']+i]== 0: hist_wcut = 0
             else: hist_wcut =  RateOut[0][T*V*wi+T*cts.i_d['Hwpr']+i]/sim_liq*100
-
 
             y_values['Sbhp'].append(RateOut[0][T*V*wi+T*cts.i_d['Sbhp']+i]) # simulated BHP
             y_values['Hbhp'].append(RateOut[0][T*V*wi+T*cts.i_d['Hbhp']+i]) # history BHP
