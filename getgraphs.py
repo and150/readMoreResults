@@ -65,7 +65,13 @@ def make_graph(root_name, well_name, x_values, ys_values):
 
     par3.plot(x_values, ys_values['wPI4'], '-', color='magenta', label="wPI4", linewidth=0.5, zorder=5) # wPI4
 
-    host.legend(bbox_to_anchor=(0.0, -0.4, 1.0, 0.3), ncol=5, mode="expand", columnspacing=1.0)
+    host.legend(bbox_to_anchor=(0.0, -0.4, 1.0, 0.3), ncol=5, mode="expand", columnspacing=1.0) # dimensions hardcoded :(
+
+    # TODO find out how to add table with statistics at the bottom of the picture
+    rows = [well_name]
+    columns = ('header1', 'header2', 'header3', 'header4', 'header5')
+    cell_text = [[111, 222, 333, 444, 555]]
+    plt.table(cellText=cell_text, rowLabels=rows, colLabels=columns, bbox=(-0.10, -0.42, 1.35, 0.10)) # dimensions hardcoded :(
 
     # TODO save pictures into pptx file
     plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight') # plt.show()
