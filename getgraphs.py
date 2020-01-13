@@ -8,46 +8,58 @@ import mpl_toolkits.axisartist as AA
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
 
-
-def get_statistics(stat_file, well_name):
-    pass
-'''
 import os
-import argparse
-from openpyxl import load_workbook
-from openpyxl import Workbook
+from openpyxl import load_workbook, Workbook
 
-TB_WIDTH = 22
-TB_START_ROW = 23
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 
-parser = argparse.ArgumentParser()
-parser.add_argument("inputfile", help="provides a name of results file to read")
-args = parser.parse_args()
 
-currDir = os.path.dirname( os.path.abspath(args.inputfile))
-fileName = os.path.basename(args.inputfile)
+'''local constants'''
+#STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
+STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
+STAT_WORKSHEET = 'stat_ext'
 
-try:
-    wb = load_workbook(currDir+"\\"+fileName, data_only=True)
-    ws = wb['stat_ext'] 
 
-    #header = [ws.cell(TB_START_ROW,col).value for col in range(1,TB_WIDTH)] # no replacing Delta
-    header = [ ''.join( 'd' if x=='\u0394' else x for x in list(ws.cell(TB_START_ROW,col).value)) for col in range(1,TB_WIDTH)]
-    print(header)
+def get_statistics(statistics_file_name, well_name):
+    TB_WIDTH = 23
+    TB_START_ROW = 23
+
+    wb = load_workbook(statistics_file_name, data_only=True)
+    ws = wb[STAT_WORKSHEET]  
+
+    header = [ws.cell(TB_START_ROW,col).value for col in range(1,TB_WIDTH)] # no replacing Delta
+    #header = [ ''.join( 'd' if x=='\u0394' else x for x in list(ws.cell(TB_START_ROW,col).value)) for col in range(1,TB_WIDTH)]
+    data_record = []
 
     row = TB_START_ROW+1
     while ws.cell(row, 1).value:
-        data_record = [ws.cell(row,col).value for col in range(1,TB_WIDTH)] 
-        #print(data_record)
+        if well_name == ws.cell(row, 1).value:
+            data_record = [ws.cell(row,col).value for col in range(1,TB_WIDTH)]
         row+=1
 
-except IOError as Argument:
-    print("Error: ", Argument)
-'''
+    #print(header)
+    #print(f"well_name = {well_name}")
+    #print(data_record)
+
+    # paint error cells
+    error_colours = ['none']*(TB_WIDTH-1)
+    ind = {4:5, 8:10, 11:10, 14:10, 17:10, 20:10, 21:10} # indexes:errors for hm_journal.xlsx !!!
+    for i in ind:
+        if isinstance(data_record[i], float) or isinstance(data_record[i], int):
+            if data_record[i] > ind[i]: 
+                error_colours[i] = 'lightcoral'
+            elif data_record[i] < ind[i]*(-1):
+                error_colours[i] = 'lightblue'
+    return (header, [f"{x:.1f}" if isinstance(x,float) or isinstance(x,int) else x for x in data_record], error_colours)
 
 
 
 def make_graph(root_name, well_name, x_values, ys_values):
+    fig = plt.figure()
+    fig.patch.set_facecolor('b')
+    fig.patch.set_alpha(0.5)
+
     host = host_subplot(111, axes_class=AA.Axes)
     #plt.subplots(figsize=(20,10))
     plt.subplots_adjust(right=1.0)
@@ -105,20 +117,34 @@ def make_graph(root_name, well_name, x_values, ys_values):
 
     host.legend(bbox_to_anchor=(0.0, -0.4, 1.0, 0.3), ncol=5, mode="expand", columnspacing=1.0) # dimensions hardcoded :(
 
-    # TODO find out how to add table with statistics at the bottom of the picture
-    rows = [well_name]
-    columns = ('header1', 'header2', 'header3', 'header4', 'header5')
-    cell_text = [[111, 222, 333, 444, 555]]
-    plt.table(cellText=cell_text, rowLabels=rows, colLabels=columns, bbox=(-0.10, -0.42, 1.35, 0.10)) # dimensions hardcoded :(
+    # TODO add table with statistics at the bottom of the picture
+    # TODO think how better pass the statistics file name into the program, now it is a constant!
+    statistics = get_statistics(STAT_FILE, well_name)
+    columns = statistics[0] 
+    # TODO find out how to convert all interface constants into proportions !!!
+    #'''!!!constant columns widths for 22 columns hm_journal.xlsx format !!!'''
+    col_width = [0.047,0.056,0.056,0.044,0.044,0.050,0.050,0.044,0.044,0.050,0.050,0.044,0.039,0.039,0.044,0.051,0.051,0.038,0.039,0.039,0.039,0.040]
+    cell_text = [statistics[1]]
+    the_table = plt.table(cellText=cell_text, 
+                colLabels=columns, 
+                colWidths=col_width,
+                colColours=['lightgrey']*len(columns),
+                cellColours=[statistics[2]],
+                cellLoc='center',
+                bbox=(-0.10, -0.50, 2.00, 0.23)) # dimensions hardcoded :(
+    the_table.auto_set_font_size(False)
+    the_table.set_fontsize(7.6)
+    for col in range(len(columns)):
+        the_table[0,col].set_height(0.8)
+        the_table[1,col].set_height(0.2)
 
-    # TODO save pictures into pptx file
-    plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight') # plt.show()
+    # TODO save pictures into pptx file (temporarily the pptx file with links to png files is done)
+    plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight', transparent=True) # hardcode folder and pictures extension # plt.show() 
     plt.close()
 
 
 
 def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
-
     Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
 
     T = len(times)
@@ -129,8 +155,8 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     x_values = [s_d+timedelta(days=x.tos) for x in times]
     y_values = {} 
 
-    for well_name in RateOut[1]: # no filters
-    #for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter
+    #for well_name in RateOut[1]: # no filters
+    for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
