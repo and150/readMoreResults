@@ -8,16 +8,21 @@ import mpl_toolkits.axisartist as AA
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
 
-import os
+import os, io
 from openpyxl import load_workbook, Workbook
 
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.dml.color import RGBColor
+
+
 ### local constants ###
-#STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
-STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
+STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
+#STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
 STAT_WORKSHEET = 'stat_ext'
 TB_WIDTH = 23
 TB_START_ROW = 23
@@ -53,7 +58,7 @@ def get_statistics(statistics_file_name, well_names):
 
 
 
-def make_graph(root_name, well_name, x_values, ys_values, header, well_stat):
+def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs):
     fig = plt.figure()
     fig.patch.set_facecolor('b')
     fig.patch.set_alpha(0.5)
@@ -92,7 +97,7 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat):
     par2.set_ylim(0,100) # wcut
     par3.set_ylim(0,wPI_lim) # wPI
 
-    plt.title(f"{well_name}")
+    #plt.title(f"{well_name}")
     host.set_xlabel("Date")
     host.set_ylabel("P, barsa")
     par1.set_ylabel("Q, sm3/day")
@@ -132,9 +137,44 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat):
         the_table[0,col].set_height(0.8)
         the_table[1,col].set_height(0.2)
 
+    #plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight', transparent=True) # hardcode folder and pictures extension # plt.show() 
     # TODO save pictures into pptx file (temporarily the pptx file with links to png files is done)
-    plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight', transparent=True) # hardcode folder and pictures extension # plt.show() 
+    image_stream = io.BytesIO()
+    plt.savefig(image_stream, dpi=600, bbox_inches='tight',transparent=True)
+    make_slide(prs, well_name, image_stream)
+
     plt.close()
+
+
+
+def make_slide(prs, well_name, image_stream):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    pic = slide.shapes.add_picture(image_stream, Inches(0.0), Inches(1.138), height=Inches(5.098)) # picture position hardcoded 5.224 height with plt.title
+
+    slide_header_box = slide.shapes.add_textbox(Inches(0.465), Inches(0.441), Inches(8.898), Inches(0.449))
+    slide_header = slide_header_box.text_frame
+    p = slide_header.paragraphs[0]
+    run = p.add_run()
+    run.font.name = 'Tahoma'
+    run.font.size = Pt(22)
+    run.text = well_name
+
+    conclusion_box = slide.shapes.add_textbox(Inches(0.118), Inches(6.468), Inches(9.764), Inches(0.405))
+    conclusion = conclusion_box.text_frame
+    p = conclusion.paragraphs[0]
+    run = p.add_run()
+    run.font.name = 'Tahoma'
+    run.font.size = Pt(18)
+    run.text = "Скважина соответствует ТЗ"
+    run.font.color.rgb = RGBColor(0, 176, 80)
+
+    comment_box = slide.shapes.add_textbox(Inches(7.067), Inches(1.291), Inches(2.657), Inches(1.953))
+    comment = comment_box.text_frame
+    p = comment.paragraphs[0]
+    run = p.add_run()
+    run.font.name = 'Tahoma'
+    run.font.size = Pt(12)
+    run.text = "Комментарий"
 
 
 
@@ -152,8 +192,10 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     stat_table_header = stat_from_excel[0]
     statistics_data = stat_from_excel[1]
 
-    #for well_name in RateOut[1]: # no filters
-    for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
+    prs = Presentation()
+
+    for well_name in RateOut[1]: # no filters
+    #for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
@@ -179,4 +221,6 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
             y_values['Hwir'].append(RateOut[0][T*V*wi+T*cts.i_d['Hwir']+i]) # history Water injection 
             y_values['wPI4'].append(RateOut[0][T*V*wi+T*cts.i_d['wPI4']+i]) # simulated well production index 4-point 
 
-        make_graph(rootName, well_name.strip(), x_values, y_values, stat_table_header, statistics_data[well_name.strip()])
+        make_graph(rootName, well_name.strip(), x_values, y_values, stat_table_header, statistics_data[well_name.strip()], prs)
+
+    prs.save(rootName+'_allWells.pptx')
