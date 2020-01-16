@@ -21,9 +21,12 @@ from pptx.dml.color import RGBColor
 
 
 ### local constants ###
-STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
-#STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
+#STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
+STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
 STAT_WORKSHEET = 'stat_ext'
+
+PRS_TEMPLATE = "D:/WQ2/HM/prs_template.pptx"
+TEMPLATE_NUMBER  = 4  # the number of layout in user templates (check in Slide Master)
 TB_WIDTH = 23
 TB_START_ROW = 23
 
@@ -34,6 +37,7 @@ def get_statistics(statistics_file_name, well_names):
     header = [ws.cell(TB_START_ROW,col).value for col in range(1,TB_WIDTH)] # no replacing Delta
     #header = [ ''.join( 'd' if x=='\u0394' else x for x in list(ws.cell(TB_START_ROW,col).value)) for col in range(1,TB_WIDTH)]
 
+    well_matched = True
     data_table = {} 
     ind = {4:5, 8:10, 11:10, 14:10, 17:10, 20:10, 21:10} # {column_indexes:error_tolerances} for hm_journal.xlsx !!!
     row = TB_START_ROW+1
@@ -48,11 +52,14 @@ def get_statistics(statistics_file_name, well_names):
                 if isinstance(data_record[i], float) or isinstance(data_record[i], int):
                     if data_record[i] > ind[i]: 
                         error_colours[i] = 'lightcoral'
+                        well_matched = False
                     elif data_record[i] < ind[i]*(-1):
                         error_colours[i] = 'lightblue'
+                        well_matched = False
                     else:
                         error_colours[i] = 'none'
-            data_table.update({data_record[0]:[[f"{x:.1f}" if isinstance(x,float) or isinstance(x,int) else x for x in data_record], error_colours]})
+            data_table.update({data_record[0]:[[f"{x:.1f}" if isinstance(x,float) or isinstance(x,int) else x for x in data_record], error_colours, well_matched]})
+            well_matched = True
         row+=1
     return (header, data_table)
 
@@ -62,7 +69,7 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
     fig = plt.figure()
     fig.patch.set_facecolor('b')
     fig.patch.set_alpha(0.5)
-
+    #print(well_stat)
     host = host_subplot(111, axes_class=AA.Axes)
     #plt.subplots(figsize=(20,10))
     plt.subplots_adjust(right=1.0)
@@ -141,14 +148,14 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
     # TODO save pictures into pptx file (temporarily the pptx file with links to png files is done)
     image_stream = io.BytesIO()
     plt.savefig(image_stream, dpi=600, bbox_inches='tight',transparent=True)
-    make_slide(prs, well_name, image_stream)
+    make_slide(prs, well_name, well_stat[2], image_stream)
 
     plt.close()
 
 
 
-def make_slide(prs, well_name, image_stream):
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
+def make_slide(prs, well_name, well_matched, image_stream):
+    slide = prs.slides.add_slide(prs.slide_layouts[TEMPLATE_NUMBER]) # layout number from Slide Master (
     pic = slide.shapes.add_picture(image_stream, Inches(0.0), Inches(1.138), height=Inches(5.098)) # picture position hardcoded 5.224 height with plt.title
 
     slide_header_box = slide.shapes.add_textbox(Inches(0.465), Inches(0.441), Inches(8.898), Inches(0.449))
@@ -165,8 +172,13 @@ def make_slide(prs, well_name, image_stream):
     run = p.add_run()
     run.font.name = 'Tahoma'
     run.font.size = Pt(18)
-    run.text = "Скважина соответствует ТЗ"
-    run.font.color.rgb = RGBColor(0, 176, 80)
+    # TODO need to check well statistics and write correct conclusion
+    if well_matched:
+        run.text = "Скважина соответствует ТЗ"
+        run.font.color.rgb = RGBColor(0, 176, 80)
+    else:
+        run.text = "Скважина не соответствует ТЗ"
+        run.font.color.rgb = RGBColor(228, 108, 10)
 
     comment_box = slide.shapes.add_textbox(Inches(7.067), Inches(1.291), Inches(2.657), Inches(1.953))
     comment = comment_box.text_frame
@@ -179,7 +191,6 @@ def make_slide(prs, well_name, image_stream):
 
 
 def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
-    Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
     T = len(times)
     MZ = numsArray[5-1]                 # number of connections
     V = cts.VEC + MZ*2*numsArray[55-1]  # number of vectors
@@ -192,10 +203,11 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     stat_table_header = stat_from_excel[0]
     statistics_data = stat_from_excel[1]
 
-    prs = Presentation()
+    prs = Presentation(PRS_TEMPLATE)
+    #Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
 
-    for well_name in RateOut[1]: # no filters
-    #for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
+    #for well_name in RateOut[1]: # no filters
+    for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
