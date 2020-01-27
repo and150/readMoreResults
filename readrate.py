@@ -1,7 +1,13 @@
 #-*- coding:utf-8 -*-
-import array, struct
+import array, struct, sys
 from getbindata import getBinData
 import constants as cts
+import tracemalloc
+
+
+#from pympler.tracker import SummaryTracker
+#tracker = SummaryTracker()
+#tracker.print_diff()
 
 def readRATE (input_file, nums=[], times=[]):
     class RatesHeader:
@@ -39,6 +45,12 @@ def readRATE (input_file, nums=[], times=[]):
             print(self.descr)
             print(self.ASIND)
             print(self.ASDEPTH)    
+
+
+    #print(f"\nin the beginning of the module")
+    #tracker.print_diff()
+
+    tracemalloc.start()
 
 
     #get data from num array
@@ -157,14 +169,28 @@ def readRATE (input_file, nums=[], times=[]):
     totlen =  mw*wlen + mg*glen + aqlen*NAQUIF + nquant*nbr
     #print(wlen," ", glen, " ", aqlen, " ", nquant, " ",totlen)
 
+    #print(f"\nbefore entering timestep cycle")
+    #tracker.print_diff()
+
+
+
     # by timesteps
     for n in range(0,nrate): 
        
         # reads one timestep
         line = input_file.read(totlen )
+        #print(f"{n}  --  {sys.getsizeof(line)}")
 
-        #if n%50==0: print("STEP ",n)     # debug output                      
-        #print("STEP ",n)
+        if n%100==0:  # debug 
+        #    print("STEP ",n)  
+        #    tracker.print_diff()
+
+            print("\n---============================-----------------------------------------------------------\n")
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+            for stat in top_stats[:10]:
+                print(stat)
+
         
         # READ WELL RATES        
         s = 0
@@ -299,6 +325,14 @@ def readRATE (input_file, nums=[], times=[]):
             
         # return array of data read, timesteps converted to array of vectors
     #return Items
+
+    #print(f"\nbefore input_file.close()")
+    #tracker.print_diff()
+
     input_file.close()
     #[print(f"timestep={item[0]} well_num={item[1]} i-index={item[2]} j-index={item[3]} k-index={item[4]}") for item in perf_array] # debug
+
+    #print(f"\nbefore return")
+    #tracker.print_diff()
+
     return (ResArr, WNAMES, perf_array)

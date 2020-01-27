@@ -1,46 +1,57 @@
 #-*- coding:utf-8 -*-
 import argparse, sys, os, mmap
-import cProfile, pstats, io
-import numpy as np
+#import cProfile, pstats, io
+#import numpy as np
 
 
-from readmisc import readMISC 
-from readctl  import readCTL  
-from readrate import readRATE 
-from readgrd  import read_static_arrays
+#from readmisc import readMISC 
+#from readctl  import readCTL  
+#from readrate import readRATE 
+#from readgrd  import read_static_arrays
 #from readrt import readRATE 
 
-import getkh, getwt, getipr, getit, getplt, getcpt
-import getgraphs
-import getStartRate
+#import getkh, getwt, getipr, getit, getplt, getcpt, getgraphs, getStartRate
+
 from printrate import printRate
 
 
 def readMore(currDir, rootName): # read MORE result files
     # MISC
+    startDate = []
+    numsArray = []
     with open(currDir+"\\"+rootName+".mis", "r+b") as file: 
-	    miscFile = mmap.mmap(file.fileno(),0)
-    miscOut = readMISC(miscFile);
-    startDate = miscOut[0]
-    numsArray = miscOut[1]
-    miscFile.close()        
+        miscFile = mmap.mmap(file.fileno(),0)
+        from readmisc import readMISC 
+        miscOut = readMISC(miscFile);
+        startDate = miscOut[0]
+        numsArray = miscOut[1]
+        #miscFile.close()        
 
     # CTL
+    times = []
     with open(currDir+"\\"+rootName+".ctl", "r+b") as file:  
-	    ctlFile = mmap.mmap(file.fileno(),0)
-    times = readCTL(ctlFile); 
-    ctlFile.close()                   
+        ctlFile = mmap.mmap(file.fileno(),0)
+        from readctl  import readCTL  
+        times = readCTL(ctlFile); 
+        #ctlFile.close()                   
 
     # RATE
+    RateOut = []
     with open(currDir+"\\"+rootName+".rat", "r+b") as file:  
-	    RateOut = readRATE(file, numsArray, times) 
+        from readrate import readRATE 
+        #RateOut = readRATE(file, numsArray, times) 
+        #rateFile = mmap.mmap(file.fileno(),0)
+        RateOut = readRATE(mmap.mmap(file.fileno(),0), numsArray, times) 
+
     return(startDate, times, numsArray, RateOut)
+
 
 def read_grd(currDir, rootName, out_arrays_names): # read MORE Grid file
     # GRID
     with open(currDir+"\\"+rootName+".grd", "r+b") as file:  
+        from readgrd  import read_static_arrays
         return read_static_arrays(file,out_arrays_names) 
-    #return(grd_out)
+        #return(grd_out)
 
 
 '''profiler start'''
@@ -71,39 +82,47 @@ try:
 
     """ crossplot generation """
     if args.CPT!="-999": 
-        getcpt.getCPT(currDir, rootName, startDate, times, numsArray, RateOut, args.CPT)      
+        from getcpt import getCPT
+        getCPT(currDir, rootName, startDate, times, numsArray, RateOut, args.CPT)      
 
     """ well test results output (PI) """
     if args.WT:
-        getwt.getWT(currDir, rootName, startDate, times, numsArray, RateOut)      
+        from getwt import getWT
+        getWT(currDir, rootName, startDate, times, numsArray, RateOut)      
 
     """ well test results output """
     if args.IT:
-        getit.getIT(currDir, rootName, startDate, times, numsArray, RateOut)      
+        from getit import getIT
+        getIT(currDir, rootName, startDate, times, numsArray, RateOut)      
         
     """ well IPR results output (PI) """
     if args.IPR:
-        getipr.getIPR(currDir, rootName, startDate, times, numsArray, RateOut)      
+        from getipr import getIPR
+        getIPR(currDir, rootName, startDate, times, numsArray, RateOut)      
 
     """ PLT profiles output """
     if args.PLT:
-        getplt.getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
+        from getplt import getPLT
+        getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
         
     """ GRAPHS output """
     if args.GRAPHS:
-        getgraphs.get_graphs(currDir, rootName, startDate, times, numsArray, RateOut)
+        from getgraphs import get_graphs
+        get_graphs(currDir, rootName, startDate, times, numsArray, RateOut)
 
     """ GRID read """
     if args.KH:
         out_arrays_names = ['DZTV','PERMX', 'PERMY'] #['DZTV','PERMX','PERMY'] 
         out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
         with open(currDir+"\\"+rootName+".kh_out","w") as kh_out_file:
+            import getkh
             getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file)
 
 
     """ start rates, first year av.rates and cumulatives export """
     if args.AVR:
-        getStartRate.getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)
+        from getStartRate import getAVRCUM
+        getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)
 #    else:
 #        print("no action chosen for {}".format(rootName))
 

@@ -8,7 +8,7 @@ import mpl_toolkits.axisartist as AA
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
 
-import os, io
+import io #,os
 from openpyxl import load_workbook, Workbook
 
 from pandas.plotting import register_matplotlib_converters
@@ -21,8 +21,8 @@ from pptx.dml.color import RGBColor
 
 
 ### local constants ###
-#STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
-STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
+STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
+#STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
 STAT_WORKSHEET = 'stat_ext'
 
 PRS_TEMPLATE = "D:/WQ2/HM/prs_template.pptx"
@@ -206,8 +206,8 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     prs = Presentation(PRS_TEMPLATE)
     #Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
 
-    #for well_name in RateOut[1]: # no filters
-    for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
+    for well_name in RateOut[1]: # no filters
+    #for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
