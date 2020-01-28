@@ -2,12 +2,8 @@
 import array, struct, sys
 from getbindata import getBinData
 import constants as cts
-import tracemalloc
+#import tracemalloc
 
-
-#from pympler.tracker import SummaryTracker
-#tracker = SummaryTracker()
-#tracker.print_diff()
 
 def readRATE (input_file, nums=[], times=[]):
     class RatesHeader:
@@ -47,10 +43,7 @@ def readRATE (input_file, nums=[], times=[]):
             print(self.ASDEPTH)    
 
 
-    #print(f"\nin the beginning of the module")
-    #tracker.print_diff()
-
-    tracemalloc.start()
+#    tracemalloc.start()
 
 
     #get data from num array
@@ -90,6 +83,9 @@ def readRATE (input_file, nums=[], times=[]):
 
     nrate = len(times)
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
+    #perf_array1 = [] # linear array of perfs
+    nv = 4 # i, j, k + lgr indexes
+    perf_array1 = [0]*nrate*nv*mw*mwzone # linear array of perfs
     perf_array = [] # array of well completions by timesteps and by well numbers [timestep, well_number, [i-index], [j-index], [k-index]]
 
     WNAMES = []
@@ -169,10 +165,6 @@ def readRATE (input_file, nums=[], times=[]):
     totlen =  mw*wlen + mg*glen + aqlen*NAQUIF + nquant*nbr
     #print(wlen," ", glen, " ", aqlen, " ", nquant, " ",totlen)
 
-    #print(f"\nbefore entering timestep cycle")
-    #tracker.print_diff()
-
-
 
     # by timesteps
     for n in range(0,nrate): 
@@ -181,15 +173,14 @@ def readRATE (input_file, nums=[], times=[]):
         line = input_file.read(totlen )
         #print(f"{n}  --  {sys.getsizeof(line)}")
 
-        if n%100==0:  # debug 
+        #if n%100==0:  # debug 
         #    print("STEP ",n)  
-        #    tracker.print_diff()
 
-            print("\n---============================-----------------------------------------------------------\n")
-            snapshot = tracemalloc.take_snapshot()
-            top_stats = snapshot.statistics('lineno')
-            for stat in top_stats[:10]:
-                print(stat)
+            #print("\n---============================-----------------------------------------------------------\n")
+            #snapshot = tracemalloc.take_snapshot()
+            #top_stats = snapshot.statistics('lineno')
+            #for stat in top_stats[:10]:
+            #    print(stat)
 
         
         # READ WELL RATES        
@@ -216,7 +207,12 @@ def readRATE (input_file, nums=[], times=[]):
             j_comp = iarr[mwzone*2:mwzone*3] #  get j-index of the current flowing connections
             k_comp = iarr[mwzone*3:mwzone*4] #  get k-index of the current flowing connections
             lgr_index = iarr[mwzone*4:mwzone*5] # 0 - global grid, else LGR index
-            perf_array.append([n,j,[*i_comp], [*j_comp], [*k_comp], [*lgr_index]]) # append current well connections
+            #perf_array.append([n,j,[*i_comp], [*j_comp], [*k_comp], [*lgr_index]]) # append current well connections
+
+            #for i in iarr[mwzone*1:mwzone*5]: #i, j, k, lgr - indexes
+            #    perf_array1.append(i)
+            perf_array1[ mw*nv*mwzone*n + nv*mwzone*j : mw*nv*mwzone*n + nv*mwzone*j +nv*mwzone ] = iarr[mwzone*1:mwzone*5]
+
             #print(f"timestep={n}, wellnumber= {j}, block_index={block_index}, comps={[i_comp, j_comp, k_comp]}") # debug
 
 
@@ -272,14 +268,19 @@ def readRATE (input_file, nums=[], times=[]):
                    if k_comp[kk] !=0:
                       ResArr[nrate*V*j + nrate*(Vbase + k_comp[kk]-1) + n] = farr[kk]  # get connection oil rate
                       ResArr[nrate*V*j + nrate*(Vbase + mwzone + k_comp[kk] - 1) + n] = farr[kk + 2*mwzone] # get connection water rate (injection rate)
-
-
+                del farr[:]
+                
 
            # wvlay  # Well layer volume flows float*4
 
            #if IWVLAY == 1:                      
            #     for k in range(0,NIWVLAY):       
            #         line.seek(mwzone*floatSize,1) 
+
+            del i_comp[:]
+            del j_comp[:]
+            del k_comp[:]
+            del lgr_index[:]
 
         #READ GROUP AND FIP DATA
         #line.seek(mg*(1*intSize + leng*floatSize + NIGRVOL*nstr*floatSize + mw*floatSize + NIGVLAY*mwzone*floatSize ),1)
@@ -326,13 +327,7 @@ def readRATE (input_file, nums=[], times=[]):
         # return array of data read, timesteps converted to array of vectors
     #return Items
 
-    #print(f"\nbefore input_file.close()")
-    #tracker.print_diff()
-
     input_file.close()
     #[print(f"timestep={item[0]} well_num={item[1]} i-index={item[2]} j-index={item[3]} k-index={item[4]}") for item in perf_array] # debug
 
-    #print(f"\nbefore return")
-    #tracker.print_diff()
-
-    return (ResArr, WNAMES, perf_array)
+    return (ResArr, WNAMES, perf_array, perf_array1)

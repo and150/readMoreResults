@@ -79,6 +79,7 @@ try:
     out = readMore(currDir,rootName) # results array
     startDate, times, numsArray, RateOut = out[0], out[1], out[2], out[3]
     well_names, perfs_array = RateOut[1], RateOut[2]
+    perfs_array_linear = RateOut[3]
 
     """ crossplot generation """
     if args.CPT!="-999": 
@@ -116,7 +117,7 @@ try:
         out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
         with open(currDir+"\\"+rootName+".kh_out","w") as kh_out_file:
             import getkh
-            getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file)
+            getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file, perfs_array_linear)
 
 
     """ start rates, first year av.rates and cumulatives export """
