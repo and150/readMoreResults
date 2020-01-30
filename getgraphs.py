@@ -21,8 +21,8 @@ from pptx.dml.color import RGBColor
 
 
 ### local constants ###
-STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
-#STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
+#STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
+STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
 STAT_WORKSHEET = 'stat_ext'
 
 PRS_TEMPLATE = "D:/WQ2/HM/prs_template.pptx"
@@ -145,9 +145,9 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
         the_table[1,col].set_height(0.2)
 
     #plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight', transparent=True) # hardcode folder and pictures extension # plt.show() 
-    # TODO save pictures into pptx file (temporarily the pptx file with links to png files is done)
+    # TODO pptx file is too heavy (check if is possible to make lighter pictures)
     image_stream = io.BytesIO()
-    plt.savefig(image_stream, dpi=600, bbox_inches='tight',transparent=True)
+    plt.savefig(image_stream, dpi=200, bbox_inches='tight',transparent=True)
     make_slide(prs, well_name, well_stat[2], image_stream)
 
     plt.close()
@@ -206,8 +206,8 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     prs = Presentation(PRS_TEMPLATE)
     #Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
 
-    for well_name in RateOut[1]: # no filters
-    #for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
+    #for well_name in RateOut[1]: # no filters
+    for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}

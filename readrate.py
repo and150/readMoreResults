@@ -2,8 +2,6 @@
 import array, struct, sys
 from getbindata import getBinData
 import constants as cts
-#import tracemalloc
-
 
 def readRATE (input_file, nums=[], times=[]):
     class RatesHeader:
@@ -43,9 +41,6 @@ def readRATE (input_file, nums=[], times=[]):
             print(self.ASDEPTH)    
 
 
-#    tracemalloc.start()
-
-
     #get data from num array
     ncompt = nums[2-1]  # Total number of components
     mw = nums[3-1]      # Maximum number of wells
@@ -83,10 +78,9 @@ def readRATE (input_file, nums=[], times=[]):
 
     nrate = len(times)
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
-    #perf_array1 = [] # linear array of perfs
     nv = 4 # i, j, k + lgr indexes
-    perf_array1 = [0]*nrate*nv*mw*mwzone # linear array of perfs
-    perf_array = [] # array of well completions by timesteps and by well numbers [timestep, well_number, [i-index], [j-index], [k-index]]
+    #perfs_array = [] # structured array of perfs [timestep, well_number, [i-index], [j-index], [k-index]]
+    perfs_array = [0]*nrate*nv*mw*mwzone # linear array of perfs
 
     WNAMES = []
     for i in range(mw): 
@@ -171,17 +165,9 @@ def readRATE (input_file, nums=[], times=[]):
        
         # reads one timestep
         line = input_file.read(totlen )
-        #print(f"{n}  --  {sys.getsizeof(line)}")
 
-        #if n%100==0:  # debug 
+        #if n%500==0:  # debug 
         #    print("STEP ",n)  
-
-            #print("\n---============================-----------------------------------------------------------\n")
-            #snapshot = tracemalloc.take_snapshot()
-            #top_stats = snapshot.statistics('lineno')
-            #for stat in top_stats[:10]:
-            #    print(stat)
-
         
         # READ WELL RATES        
         s = 0
@@ -207,11 +193,9 @@ def readRATE (input_file, nums=[], times=[]):
             j_comp = iarr[mwzone*2:mwzone*3] #  get j-index of the current flowing connections
             k_comp = iarr[mwzone*3:mwzone*4] #  get k-index of the current flowing connections
             lgr_index = iarr[mwzone*4:mwzone*5] # 0 - global grid, else LGR index
-            #perf_array.append([n,j,[*i_comp], [*j_comp], [*k_comp], [*lgr_index]]) # append current well connections
+            #perfs_array.append([n,j,[*i_comp], [*j_comp], [*k_comp], [*lgr_index]]) # append current well connections
+            perfs_array[ mw*nv*mwzone*n + nv*mwzone*j : mw*nv*mwzone*n + nv*mwzone*j +nv*mwzone ] = iarr[mwzone*1:mwzone*5]
 
-            #for i in iarr[mwzone*1:mwzone*5]: #i, j, k, lgr - indexes
-            #    perf_array1.append(i)
-            perf_array1[ mw*nv*mwzone*n + nv*mwzone*j : mw*nv*mwzone*n + nv*mwzone*j +nv*mwzone ] = iarr[mwzone*1:mwzone*5]
 
             #print(f"timestep={n}, wellnumber= {j}, block_index={block_index}, comps={[i_comp, j_comp, k_comp]}") # debug
 
@@ -277,10 +261,10 @@ def readRATE (input_file, nums=[], times=[]):
            #     for k in range(0,NIWVLAY):       
            #         line.seek(mwzone*floatSize,1) 
 
-            del i_comp[:]
-            del j_comp[:]
-            del k_comp[:]
-            del lgr_index[:]
+           #del i_comp[:]
+           #del j_comp[:]
+           #del k_comp[:]
+           #del lgr_index[:]
 
         #READ GROUP AND FIP DATA
         #line.seek(mg*(1*intSize + leng*floatSize + NIGRVOL*nstr*floatSize + mw*floatSize + NIGVLAY*mwzone*floatSize ),1)
@@ -328,6 +312,6 @@ def readRATE (input_file, nums=[], times=[]):
     #return Items
 
     input_file.close()
-    #[print(f"timestep={item[0]} well_num={item[1]} i-index={item[2]} j-index={item[3]} k-index={item[4]}") for item in perf_array] # debug
+    #[print(f"timestep={item[0]} well_num={item[1]} i-index={item[2]} j-index={item[3]} k-index={item[4]}") for item in perfs_array] # debug
 
-    return (ResArr, WNAMES, perf_array, perf_array1)
+    return (ResArr, WNAMES, perfs_array)

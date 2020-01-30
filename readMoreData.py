@@ -1,8 +1,7 @@
 #-*- coding:utf-8 -*-
-import argparse, sys, os, mmap
+import argparse, sys, os, mmap 
 #import cProfile, pstats, io
 #import numpy as np
-
 
 #from readmisc import readMISC 
 #from readctl  import readCTL  
@@ -39,9 +38,8 @@ def readMore(currDir, rootName): # read MORE result files
     RateOut = []
     with open(currDir+"\\"+rootName+".rat", "r+b") as file:  
         from readrate import readRATE 
-        #RateOut = readRATE(file, numsArray, times) 
-        #rateFile = mmap.mmap(file.fileno(),0)
-        RateOut = readRATE(mmap.mmap(file.fileno(),0), numsArray, times) 
+        RateOut = readRATE(file, numsArray, times) 
+        #RateOut = readRATE(mmap.mmap(file.fileno(),0), numsArray, times) 
 
     return(startDate, times, numsArray, RateOut)
 
@@ -79,8 +77,8 @@ try:
     out = readMore(currDir,rootName) # results array
     startDate, times, numsArray, RateOut = out[0], out[1], out[2], out[3]
     well_names, perfs_array = RateOut[1], RateOut[2]
-    perfs_array_linear = RateOut[3]
 
+    
     """ crossplot generation """
     if args.CPT!="-999": 
         from getcpt import getCPT
@@ -117,16 +115,16 @@ try:
         out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
         with open(currDir+"\\"+rootName+".kh_out","w") as kh_out_file:
             import getkh
-            getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file, perfs_array_linear)
+            getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file)
 
 
     """ start rates, first year av.rates and cumulatives export """
     if args.AVR:
         from getStartRate import getAVRCUM
         getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)
+
 #    else:
 #        print("no action chosen for {}".format(rootName))
-
 
     #printRate(times, numsArray, RateOut) 
     #print(time.time()-stime)
