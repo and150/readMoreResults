@@ -7,8 +7,10 @@ from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.legend_handler import HandlerPatch
 
-import io #,os
+import io, re #,os
 from openpyxl import load_workbook, Workbook
 
 from pandas.plotting import register_matplotlib_converters
@@ -18,13 +20,15 @@ register_matplotlib_converters()
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
-
+from pptx.enum.shapes import MSO_SHAPE
 
 ### local constants ###
 #STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
+#STAT_FILTER = '.+' # all wells
 STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
-STAT_WORKSHEET = 'stat_ext'
+STAT_FILTER = '(?!WQ2-137)(WQ2-.+)|(WQ-11)|(WQ-13)' # all WQ2- and two WQ wells
 
+STAT_WORKSHEET = 'stat_ext'
 PRS_TEMPLATE = "D:/WQ2/HM/prs_template.pptx"
 TEMPLATE_NUMBER  = 4  # the number of layout in user templates (check in Slide Master)
 TB_WIDTH = 23
@@ -145,9 +149,10 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
         the_table[1,col].set_height(0.2)
 
     #plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight', transparent=True) # hardcode folder and pictures extension # plt.show() 
-    # TODO pptx file is too heavy (check if is possible to make lighter pictures)
+    # TODO pptx file is too heavy (check if is possible to make lighter pictures) OR SAVE AS SVG (vector format???)
     image_stream = io.BytesIO()
-    plt.savefig(image_stream, dpi=200, bbox_inches='tight',transparent=True)
+    plt.savefig(image_stream, dpi=100, bbox_inches='tight', format='jpg', optimize=True, quality=70)
+    #plt.savefig(image_stream, dpi=100, bbox_inches='tight', format='png')
     make_slide(prs, well_name, well_stat[2], image_stream)
 
     plt.close()
@@ -156,6 +161,7 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
 
 def make_slide(prs, well_name, well_matched, image_stream):
     slide = prs.slides.add_slide(prs.slide_layouts[TEMPLATE_NUMBER]) # layout number from Slide Master (
+    #pic = slide.shapes.add_shape(MSO_SHAPE.PENTAGON, Inches(0.0), Inches(1.138), height=Inches(5.098), width=Inches(9.01)) # picture position hardcoded 5.224 height with plt.title
     pic = slide.shapes.add_picture(image_stream, Inches(0.0), Inches(1.138), height=Inches(5.098)) # picture position hardcoded 5.224 height with plt.title
 
     slide_header_box = slide.shapes.add_textbox(Inches(0.465), Inches(0.441), Inches(8.898), Inches(0.449))
@@ -189,6 +195,64 @@ def make_slide(prs, well_name, well_matched, image_stream):
     run.text = "Комментарий"
 
 
+#TODO find out how to make more beautiful map 
+#TODO and insert it into pptx by request
+def make_press_map(well_names, well_coordinates, well_pressures):
+    class HandlerCircle(HandlerPatch):
+        def create_artists(self, legend, orig_handle,
+                           xdescent, ydescent, width, height, fontsize, trans):
+            r = 5
+            x = r + width/2
+            y = height/2
+            p = mpatches.Circle(xy= (x,y), radius = r)
+            self.update_prop(p, orig_handle, legend)
+            p.set_transform(trans)
+            return [p]
+    
+    def makeLegendItems(color_list, annotation_list):
+        legend_items = []
+        for l in range(0, len(color_list)):
+            legend_items.append(mpatches.Circle((0, 0),1, fc = color_list[l], edgecolor='black'))
+        return (legend_items, annotation_list)
+
+    bubble_scale = 20
+    x = [xy[0] for xy in well_coordinates]
+    y = [xy[1] for xy in well_coordinates]
+    z = [ 0 if p[0]=='-' or p[1]=='-' else float(p[1])-float(p[0]) for p in well_pressures]
+    label = [name.strip() for name in well_names]
+
+    fig, (ax1, ax2) = plt.subplots(nrows = 1, ncols = 2, figsize = (10, 7))
+
+    # map1 Plus-Minus map
+    plus_minus_colors = ['coral' if d>=0 else 'lightblue' for d in z] 
+    sct = ax1.scatter(x, y, s = [abs(i)*bubble_scale for i in z], c = plus_minus_colors, edgecolors = 'black', cmap="Spectral")
+    ax1.set_aspect('equal')
+    ax1.axes.get_xaxis().set_visible(False)
+    ax1.axes.get_yaxis().set_visible(False)
+    for lb, xx, yy in zip(label, x, y):
+        ax1.annotate(lb, (xx, yy), fontsize = 6)
+    legend_items = makeLegendItems(['lightblue', 'coral'], ['< 0', '> 0'])
+    ax1.legend( legend_items[0], legend_items[1],  loc = 'upper left', handler_map = {mpatches.Circle: HandlerCircle()})
+    #ax1.set_title("Plus-Minus map")
+
+
+    # map2 Absolute Error map
+    error_colors = ['white' if abs(d)< 5 else 'lime' if abs(d)<10  else 'red' for d in z] 
+    ax2.scatter(x, y, s = [abs(i)*bubble_scale for i in z], c = error_colors, edgecolors = 'black')
+    ax2.set_aspect('equal')
+    ax2.axes.get_xaxis().set_visible(False)
+    ax2.axes.get_yaxis().set_visible(False)
+    for lb, xx, yy in zip(label, x, y):
+        ax2.annotate(lb, (xx, yy), fontsize = 6)
+    legend_items = makeLegendItems(['white', 'lime', 'red'], ['< 5 bar','5 - 10 bar', '> 10 bar'])
+    ax2.legend(legend_items[0], legend_items[1], loc = 'upper left', handler_map = {mpatches.Circle: HandlerCircle()})
+    #ax2.set_title("Absolute Error map")
+
+    plt.subplots_adjust(left = 0.01, bottom = 0.01, right = 0.99, top = 0.93, wspace = 0.05)
+    plt.savefig('press_bubble_map.jpg', dpi=150, bbox_inches='tight', optimize=True, quality=70)
+
+
+
 
 def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     T = len(times)
@@ -199,15 +263,20 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     x_values = [s_d+timedelta(days=x.tos) for x in times]
     y_values = {} 
 
-    stat_from_excel = get_statistics(STAT_FILE, [x.strip() for x in RateOut[1]])
+    #filtered_wells = [e for f in STAT_FILTER for e in RateOut[1]  if re.match(f, e)  and not re.match('WQ2-137',e)]
+    #filtered_coords = [e[1] for f in STAT_FILTER for e in list(zip(RateOut[1], RateOut[3])) if re.match(f, e[0]) and not re.match('WQ2-137',e[0])]
+    filtered_wells = [e for e in RateOut[1] if re.match(STAT_FILTER, e)]
+    filtered_coords = [e[1] for e in list(zip(RateOut[1], RateOut[3])) if re.match(STAT_FILTER, e[0])]
+
+    stat_from_excel = get_statistics(STAT_FILE, [x.strip() for x in filtered_wells])
     stat_table_header = stat_from_excel[0]
     statistics_data = stat_from_excel[1]
 
     prs = Presentation(PRS_TEMPLATE)
     #Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
 
-    #for well_name in RateOut[1]: # no filters
-    for well_name in list(filter(lambda x: 'WQ2-' in x or 'WQ-11' in x or 'WQ-13' in x, RateOut[1])): # WQ filter hardcoded
+    #filtered_wells = [e for f in STAT_FILTER for e in RateOut[1]  if re.match(f, e)]
+    for well_name in filtered_wells:
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
@@ -235,4 +304,5 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
 
         make_graph(rootName, well_name.strip(), x_values, y_values, stat_table_header, statistics_data[well_name.strip()], prs)
 
+    make_press_map(filtered_wells, filtered_coords, [statistics_data[e][0][18:20] for f in filtered_wells for e in statistics_data if e == f.strip()])
     prs.save(rootName+'_allWells.pptx')

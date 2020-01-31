@@ -81,6 +81,7 @@ def readRATE (input_file, nums=[], times=[]):
     nv = 4 # i, j, k + lgr indexes
     #perfs_array = [] # structured array of perfs [timestep, well_number, [i-index], [j-index], [k-index]]
     perfs_array = [0]*nrate*nv*mw*mwzone # linear array of perfs
+    xy_well_coords = [(0,0)]*mw
 
     WNAMES = []
     for i in range(mw): 
@@ -209,10 +210,10 @@ def readRATE (input_file, nums=[], times=[]):
             s = f + mwl*2*nbi
             f = s + NIWRATE*nbf
             farr.frombytes(line[s:f])      
-            #print(farr)
+            #print(farr) # debug
             ResArr[nrate*V*j + nrate* cts.i_d['Sbhp'] + n] = farr[3]        # get bottom hole pressure referenced
             ResArr[nrate*V*j + nrate* cts.i_d['Sthp'] + n] = farr[9]        # get tubing head pressure
-           
+            xy_well_coords[j] = farr[0:2]  # get xy coordinates of well
 
             # wrvol    # Well volume rates and totals  float*4
             del farr[:]
@@ -314,4 +315,4 @@ def readRATE (input_file, nums=[], times=[]):
     input_file.close()
     #[print(f"timestep={item[0]} well_num={item[1]} i-index={item[2]} j-index={item[3]} k-index={item[4]}") for item in perfs_array] # debug
 
-    return (ResArr, WNAMES, perfs_array)
+    return (ResArr, WNAMES, perfs_array, xy_well_coords)
