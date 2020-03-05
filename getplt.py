@@ -40,7 +40,7 @@ def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
         wellNames[i] = wellNames[i].rstrip()
 
     pltFileName = currDir+"\\"+rootName+".PLTlist"  # input PLT list
-    pltOutFile = open(currDir+"\\"+rootName+".PLTout","w") # PLT out file
+    pltOutFile = open(currDir+"\\"+rootName+".PLT_out","w") # PLT out file
 
     MZ = numsArray[5-1]                 # number of layers
     T = len(times)                      # rate file records number

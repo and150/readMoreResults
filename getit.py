@@ -10,7 +10,7 @@ def getIT(currDir, rootName, startDate, times, numsArray, RateOut):
         wellNames[i] = wellNames[i].rstrip()
 
     wtFileName   = currDir+"\\"+rootName+".ITlist"          # well test list input file name
-    outFile  = open(currDir+"\\"+rootName+".ITgraphs", "w") # graphs output
+    outFile  = open(currDir+"\\"+rootName+".IT_graphs", "w") # graphs output
 
     ### interference test list processing
     WTlist = test_items()

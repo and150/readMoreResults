@@ -89,7 +89,7 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
     for i in range(0,len(wellNames)):
         wellNames[i] = wellNames[i].rstrip()
 
-    cptOutFile = open(currDir+"\\"+rootName+".CPTout","w")
+    cptOutFile = open(currDir+"\\"+rootName+".CPT_out","w")
     T = len(times)  
     W = len(wellNames) 
     MZ = numsArray[5-1] 

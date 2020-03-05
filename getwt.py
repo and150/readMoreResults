@@ -10,8 +10,8 @@ def getWT(currDir, rootName, startDate, times, numsArray, RateOut):
         wellNames[i] = wellNames[i].rstrip()
 
     wtFileName   = currDir+"\\"+rootName+".WTlist"  # well test list input file name
-    outFile  = open(currDir+"\\"+rootName+".WTgraphs", "w") # graphs output
-    wtOutFile = open(currDir+"\\"+rootName+".WTout","w") # parameters output
+    outFile  = open(currDir+"\\"+rootName+".WT_graphs", "w") # graphs output
+    wtOutFile = open(currDir+"\\"+rootName+".WT_out","w") # parameters output
     wtOutFile.write("WTnumb  well startPBU LIQ  LIQH  BHP  BHPH  Press  PressH stopPBU\n") # header
 
     ####### well test list processing #######

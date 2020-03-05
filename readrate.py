@@ -3,7 +3,7 @@ import array, struct, sys
 from getbindata import getBinData
 import constants as cts
 
-def readRATE (input_file, nums=[], times=[]):
+def readRATE(input_file, nums=[], times=[]):
     class RatesHeader:
     # local class of 1-st time step header    
         def __init__(self, mnem="", units="", asname="", descr="", ASIND = [], ASDEPTH = []):    

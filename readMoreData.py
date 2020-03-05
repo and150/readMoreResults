@@ -21,7 +21,7 @@ def readMore(currDir, rootName): # read MORE result files
     with open(currDir+"\\"+rootName+".mis", "r+b") as file: 
         miscFile = mmap.mmap(file.fileno(),0)
         from readmisc import readMISC 
-        miscOut = readMISC(miscFile);
+        miscOut = readMISC(miscFile)
         startDate = miscOut[0]
         numsArray = miscOut[1]
         #miscFile.close()        
@@ -31,7 +31,7 @@ def readMore(currDir, rootName): # read MORE result files
     with open(currDir+"\\"+rootName+".ctl", "r+b") as file:  
         ctlFile = mmap.mmap(file.fileno(),0)
         from readctl  import readCTL  
-        times = readCTL(ctlFile); 
+        times = readCTL(ctlFile) 
         #ctlFile.close()                   
 
     # RATE
@@ -113,7 +113,7 @@ try:
     if args.KH:
         out_arrays_names = ['DZTV','PERMX', 'PERMY'] #['DZTV','PERMX','PERMY'] 
         out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
-        with open(currDir+"\\"+rootName+".kh_out","w") as kh_out_file:
+        with open(currDir+"\\"+rootName+".KH_out","w") as kh_out_file:
             import getkh
             getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file)
 
