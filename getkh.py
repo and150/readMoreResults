@@ -1,7 +1,7 @@
 from datetime import  date, datetime, timedelta
 
 def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections, out_file):
-    for item in connections:
+    for item in sorted(connections, key=lambda x: x[2]):
         I,J,K = dimensions[item[3]][0], dimensions[item[3]][1], dimensions[item[3]][2]
         i,j,k = item[0]-1,item[1]-1,item[2]-1
         if item[0] and item[1] and item[2] > 0:
