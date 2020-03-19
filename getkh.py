@@ -11,7 +11,6 @@ def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections, o
             out_file.write("\n")
 
 
-
 def get_wells_cells(out_arrays, wells_dates_filename, well_names, perfs_array, times, start_date_array, out_file):  # gets values only for perforated cells (perfs from rate-file)
     s_d = datetime(start_date_array[2], start_date_array[1], start_date_array[0])
 
