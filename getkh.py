@@ -11,9 +11,11 @@ def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections, o
             out_file.write("\n")
 
 
-def get_wells_cells(out_arrays, wells_dates_filename, well_names, perfs_array, times, start_date_array, out_file):  # gets values only for perforated cells (perfs from rate-file)
+def get_wells_cells(out_arrays, wells_dates_filename, well_names, perfs_array, times, start_date_array, out_file, plt_items):  # gets values only for perforated cells (perfs from rate-file)
     s_d = datetime(start_date_array[2], start_date_array[1], start_date_array[0])
 
+    #for item in plt_items: print(f"{item} hello from kh list")
+    #print()
 
     ###### alternative for structured perfs_array
     #''' print wells and dates from the request and compose them with indexes of the wells from the model (well_names list)'''
@@ -45,4 +47,6 @@ def get_wells_cells(out_arrays, wells_dates_filename, well_names, perfs_array, t
 
     ''' print connection values'''
     for perf_item in selected_wells_perfs:
+        #print(perf_item)
+        #print(   [ [abs(x[3]-perf_item[1])]+x for x in plt_items if x[0]==perf_item[0]]  ) # TODO get a plt_item that is the closest to perf_item
         get_ijk_values_from_array(out_arrays[0], out_arrays[1], perf_item[0:2], list(zip(perf_item[2][2], perf_item[2][3], perf_item[2][4], perf_item[2][5])), out_file)

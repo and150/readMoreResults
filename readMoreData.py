@@ -77,12 +77,18 @@ try:
     out = readMore(currDir,rootName) # results array
     startDate, times, numsArray, RateOut = out[0], out[1], out[2], out[3]
     well_names, perfs_array = RateOut[1], RateOut[2]
+    plt_items = []
 
     
     """ crossplot generation """
     if args.CPT!="-999": 
         from getcpt import getCPT
         getCPT(currDir, rootName, startDate, times, numsArray, RateOut, args.CPT)      
+
+    """ PLT profiles output """
+    if args.PLT:
+        from getplt import getPLT
+        plt_items = getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
 
     """ well test results output (PI) """
     if args.WT:
@@ -98,11 +104,6 @@ try:
     if args.IPR:
         from getipr import getIPR
         getIPR(currDir, rootName, startDate, times, numsArray, RateOut)      
-
-    """ PLT profiles output """
-    if args.PLT:
-        from getplt import getPLT
-        getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
         
     """ GRAPHS output """
     if args.GRAPHS:
@@ -115,7 +116,7 @@ try:
         out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
         with open(currDir+"\\"+rootName+".KH_out","w") as kh_out_file:
             import getkh
-            getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file)
+            getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file, plt_items)
 
 
     """ start rates, first year av.rates and cumulatives export """

@@ -177,7 +177,7 @@ def make_slide(prs, well_name, well_matched, image_stream):
     p = conclusion.paragraphs[0]
     run = p.add_run()
     run.font.name = 'Tahoma'
-    run.font.size = Pt(18)
+    run.font.size = Pt(16)
     # TODO need to check well statistics and write correct conclusion
     if well_matched:
         run.text = "Скважина соответствует ТЗ"
@@ -290,7 +290,7 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
 
             hist_wcut = 0
             if  RateOut[0][T*V*wi+T*cts.i_d['Hopr']+i]==0 and RateOut[0][T*V*wi+T*cts.i_d['Hwpr']+i]== 0: hist_wcut = 0
-            else: hist_wcut =  RateOut[0][T*V*wi+T*cts.i_d['Hwpr']+i]/sim_liq*100
+            else: hist_wcut =  RateOut[0][T*V*wi+T*cts.i_d['Hwpr']+i]/hist_liq*100
 
             y_values['Sbhp'].append(RateOut[0][T*V*wi+T*cts.i_d['Sbhp']+i]) # simulated BHP
             y_values['Hbhp'].append(RateOut[0][T*V*wi+T*cts.i_d['Hbhp']+i]) # history BHP

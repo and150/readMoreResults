@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import constants as cts
 from item_class import *
+from datetime import datetime
 
 '''
 class plt_item(test_item):
@@ -48,7 +49,7 @@ def print_plt(pltItem, pltarr, pltLR, times, wellNames, tstep, wnumb, pltOutFile
 
 def plt_items_from_file(file_name, start_date):
     with open(file_name, 'r') as input_file:
-        return [ [x[0], date2days(x[1]+" "+x[2],start_date), x[3:]] for x in [line.split() for line in input_file if len(line)>0]] 
+        return [ [x[0], date2days(x[1]+" "+x[2],start_date), x[3:], datetime.strptime(x[1]+" "+x[2], "%d.%m.%Y %H:%M:%S")] for x in [line.split() for line in input_file if len(line)>0]] 
 
 
 def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
