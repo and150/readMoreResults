@@ -100,4 +100,5 @@ def getPLT(currDir, rootName, startDate, times, numsArray, RateOut):
                     print_plt(item, pltarr, pltLR, times, wellNames, i , j, pltOutFile)
                 else:
                     pltOutFile.write( '{} {}  liquid_rate=0\n'.format( times[i].tos, wellNames[j] ) )                                    
+
     return plt_items
