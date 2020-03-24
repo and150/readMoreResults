@@ -18,19 +18,8 @@ def get_zones(layers, indexes):
 
 def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections, out_file, plt_zone_bottom_indexes):
 
-    #print(plt_zone_bottom_indexes)
-    #print(  [ x[2] for x in sorted(connections, key=itemgetter(2)) ]  )
-
     sorted_connections = sorted(connections, key=lambda x:x[2]) 
     zones = get_zones([x[2] for x in sorted_connections], [int(x) for x in plt_zone_bottom_indexes])
-
-    #print(layers, 'aaa')
-    #print(get_zones(layers, [int(x) for x in plt_zone_bottom_indexes]))
-    #print(sorted_connections)
-    #print(zones)
-    #for item in zip(sorted_connections, zones):
-    #    print(item)
-
 
     for item in zip(sorted_connections, zones):
         I,J,K = dimensions[item[0][3]][0], dimensions[item[0][3]][1], dimensions[item[0][3]][2]
@@ -58,9 +47,6 @@ def get_ijk_values_from_array(arrays_dict, dimensions, well_date, connections, o
 
 def get_wells_cells(out_arrays, wells_dates_filename, well_names, perfs_array, times, start_date_array, out_file, plt_items):  # gets values only for perforated cells (perfs from rate-file)
     s_d = datetime(start_date_array[2], start_date_array[1], start_date_array[0])
-
-    #for item in plt_items: print(f"{item} hello from kh list")
-    #print()
 
     ###### alternative for structured perfs_array
     #''' print wells and dates from the request and compose them with indexes of the wells from the model (well_names list)'''
@@ -92,9 +78,8 @@ def get_wells_cells(out_arrays, wells_dates_filename, well_names, perfs_array, t
 
     ''' print connection values'''
     for perf_item in selected_wells_perfs:
-
         plt_zone_bottom_indexes=[]
-        if plt_items!=[]:  
+        if plt_items!=[] and perf_item[0] in [x[0] for x in plt_items]:  
             plt_zone_bottom_indexes = sorted([ [abs(x[3]-perf_item[1])]+x for x in plt_items if x[0]==perf_item[0]],key=itemgetter(0))[0][3] 
 
         get_ijk_values_from_array(out_arrays[0], out_arrays[1], perf_item[0:2], list(zip(perf_item[2][2], perf_item[2][3], perf_item[2][4], perf_item[2][5])), out_file, plt_zone_bottom_indexes)
