@@ -23,13 +23,16 @@ from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 
 ### local constants ###
-#STAT_FILE = "D:/home/py/excel_parse/model_stat.xlsx"
+## debug data
+#STAT_FILE =  "D:/vc/py/readMore/graphs_example/hm_journal.xlsx"
 #STAT_FILTER = '.+' # all wells
+#PRS_TEMPLATE = "D:/vc/py/readMore/graphs_example/prs_template.pptx"
+
 STAT_FILE = "D:/WQ2/HM/hm_journal.xlsx"
 STAT_FILTER = '(?!WQ2-137)(WQ2-.+)|(WQ-11)|(WQ-13)' # all WQ2- and two WQ wells
+PRS_TEMPLATE = "D:/WQ2/HM/prs_template.pptx"
 
 STAT_WORKSHEET = 'stat_ext'
-PRS_TEMPLATE = "D:/WQ2/HM/prs_template.pptx"
 TEMPLATE_NUMBER  = 4  # the number of layout in user templates (check in Slide Master)
 TB_WIDTH = 23
 TB_START_ROW = 23
@@ -38,7 +41,8 @@ TB_START_ROW = 23
 def get_statistics(statistics_file_name, well_names):
     wb = load_workbook(statistics_file_name, data_only=True)
     ws = wb[STAT_WORKSHEET]  
-    header = [ws.cell(TB_START_ROW,col).value for col in range(1,TB_WIDTH)] # no replacing Delta
+    column_indexes = list(range(1, TB_WIDTH))+[64]
+    header = [ws.cell(TB_START_ROW,col).value for col in column_indexes] # no replacing Delta
     #header = [ ''.join( 'd' if x=='\u0394' else x for x in list(ws.cell(TB_START_ROW,col).value)) for col in range(1,TB_WIDTH)]
 
     well_matched = True
@@ -50,7 +54,7 @@ def get_statistics(statistics_file_name, well_names):
         data_record =[0]*(TB_WIDTH-1)
 
         if ws.cell(row,1).value in well_names:
-            data_record = [ws.cell(row,col).value for col in range(1,TB_WIDTH)]
+            data_record = [ws.cell(row,col).value for col in column_indexes]
 
             for i in ind:
                 if isinstance(data_record[i], float) or isinstance(data_record[i], int):
@@ -65,6 +69,7 @@ def get_statistics(statistics_file_name, well_names):
             data_table.update({data_record[0]:[[f"{x:.1f}" if isinstance(x,float) or isinstance(x,int) else x for x in data_record], error_colours, well_matched]})
             well_matched = True
         row+=1
+
     return (header, data_table)
 
 
@@ -135,7 +140,7 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
     # TODO find out how to convert all interface constants into proportions
     #!!!constant columns widths for 22 columns hm_journal.xlsx format !!!
     col_width = [0.047,0.056,0.056,0.044,0.044,0.050,0.050,0.044,0.044,0.050,0.050,0.044,0.039,0.039,0.044,0.051,0.051,0.038,0.039,0.039,0.039,0.040]
-    the_table = plt.table(cellText=[well_stat[0]], 
+    the_table = plt.table(cellText=[well_stat[0][:-1]], 
                 colLabels=header, 
                 colWidths=col_width,
                 colColours=['lightgrey']*(TB_WIDTH-1),
@@ -149,17 +154,18 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
         the_table[1,col].set_height(0.2)
 
     #plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.png', dpi=600, bbox_inches='tight', transparent=True) # hardcode folder and pictures extension # plt.show() 
+    #plt.savefig('./'+root_name+'_pics/'+well_name+'_graph.svg',  bbox_inches='tight', transparent=True) # hardcode folder and pictures extension # plt.show() 
     # TODO pptx file is too heavy (check if is possible to make lighter pictures) OR SAVE AS SVG (vector format???)
     image_stream = io.BytesIO()
     plt.savefig(image_stream, dpi=100, bbox_inches='tight', format='jpg', optimize=True, quality=70)
     #plt.savefig(image_stream, dpi=100, bbox_inches='tight', format='png')
-    make_slide(prs, well_name, well_stat[2], image_stream)
+    make_slide(prs, well_name, well_stat[2], well_stat[0][-1], image_stream)
 
     plt.close()
 
 
 
-def make_slide(prs, well_name, well_matched, image_stream):
+def make_slide(prs, well_name, well_matched, tune_comment, image_stream):
     slide = prs.slides.add_slide(prs.slide_layouts[TEMPLATE_NUMBER]) # layout number from Slide Master (
     #pic = slide.shapes.add_shape(MSO_SHAPE.PENTAGON, Inches(0.0), Inches(1.138), height=Inches(5.098), width=Inches(9.01)) # picture position hardcoded 5.224 height with plt.title
     pic = slide.shapes.add_picture(image_stream, Inches(0.0), Inches(1.138), height=Inches(5.098)) # picture position hardcoded 5.224 height with plt.title
@@ -188,12 +194,13 @@ def make_slide(prs, well_name, well_matched, image_stream):
 
     comment_box = slide.shapes.add_textbox(Inches(7.067), Inches(1.291), Inches(2.657), Inches(1.953))
     comment = comment_box.text_frame
+    comment.word_wrap= True
     p = comment.paragraphs[0]
     run = p.add_run()
     run.font.name = 'Tahoma'
     run.font.size = Pt(12)
-    run.text = "Комментарий"
-
+    #run.text = "Комментарий"
+    run.text = tune_comment
 
 #TODO find out how to make more beautiful map 
 #TODO and insert it into pptx by request
@@ -276,7 +283,8 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     #Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
 
     #filtered_wells = [e for f in STAT_FILTER for e in RateOut[1]  if re.match(f, e)]
-    for well_name in filtered_wells:
+    #for well_name in filtered_wells:
+    for well_name in sorted(filtered_wells, key=lambda x: int(str(x).split('-')[1]) if '-' in x else x):  # works only for names XXX-111!!!!!!!   # TODO check if it sorts how I need  !!!!
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
