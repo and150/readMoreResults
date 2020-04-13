@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import constants as cts
 import statistics
 from datetime import datetime, timedelta
@@ -159,8 +160,8 @@ def make_graph(root_name, well_name, x_values, ys_values, header, well_stat, prs
     image_stream = io.BytesIO()
     plt.savefig(image_stream, dpi=100, bbox_inches='tight', format='jpg', optimize=True, quality=70)
     #plt.savefig(image_stream, dpi=100, bbox_inches='tight', format='png')
-    make_slide(prs, well_name, well_stat[2], well_stat[0][-1], image_stream)
 
+    make_slide(prs, well_name, well_stat[2], well_stat[0][-1], image_stream)
     plt.close()
 
 
@@ -200,7 +201,10 @@ def make_slide(prs, well_name, well_matched, tune_comment, image_stream):
     run.font.name = 'Tahoma'
     run.font.size = Pt(12)
     #run.text = "Комментарий"
-    run.text = tune_comment
+    if tune_comment is None:
+        run.text =""
+    else:
+        run.text = tune_comment
 
 #TODO find out how to make more beautiful map 
 #TODO and insert it into pptx by request
@@ -256,10 +260,18 @@ def make_press_map(well_names, well_coordinates, well_pressures):
     #ax2.set_title("Absolute Error map")
 
     plt.subplots_adjust(left = 0.01, bottom = 0.01, right = 0.99, top = 0.93, wspace = 0.05)
-    plt.savefig('press_bubble_map.jpg', dpi=150, bbox_inches='tight', optimize=True, quality=70)
+    #plt.savefig('press_bubble_map.jpg', dpi=150, bbox_inches='tight', optimize=True, quality=70)
 
 
-
+def get_sort_key(item):
+    keys_list = re.findall(r'(\d+)', str(item))
+    if len(keys_list)>0:
+        return int(keys_list[-1])
+    else:
+        sum_ind = 999999
+        for i in str(item):
+            sum_ind += ord(i) - 96
+        return sum_ind
 
 def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     T = len(times)
@@ -270,9 +282,7 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     x_values = [s_d+timedelta(days=x.tos) for x in times]
     y_values = {} 
 
-    #filtered_wells = [e for f in STAT_FILTER for e in RateOut[1]  if re.match(f, e)  and not re.match('WQ2-137',e)]
-    #filtered_coords = [e[1] for f in STAT_FILTER for e in list(zip(RateOut[1], RateOut[3])) if re.match(f, e[0]) and not re.match('WQ2-137',e[0])]
-    filtered_wells = [e for e in RateOut[1] if re.match(STAT_FILTER, e)]
+    filtered_wells = [e for e in RateOut[1] if re.match(STAT_FILTER, e)] # works
     filtered_coords = [e[1] for e in list(zip(RateOut[1], RateOut[3])) if re.match(STAT_FILTER, e[0])]
 
     stat_from_excel = get_statistics(STAT_FILE, [x.strip() for x in filtered_wells])
@@ -280,11 +290,8 @@ def get_graphs(currDir, rootName, start_date_array, times, numsArray, RateOut):
     statistics_data = stat_from_excel[1]
 
     prs = Presentation(PRS_TEMPLATE)
-    #Path(rootName+"_pics").mkdir(parents=True, exist_ok=True)
-
-    #filtered_wells = [e for f in STAT_FILTER for e in RateOut[1]  if re.match(f, e)]
     #for well_name in filtered_wells:
-    for well_name in sorted(filtered_wells, key=lambda x: int(str(x).split('-')[1]) if '-' in x else x):  # works only for names XXX-111!!!!!!!   # TODO check if it sorts how I need  !!!!
+    for well_name in sorted(filtered_wells, key=get_sort_key):  #  TODO check how it sorts 
         wi = RateOut[1].index(well_name) 
         y_values.clear()
         y_values = {'Sbhp':[], 'Hbhp':[], 'Sliq':[], 'Hliq':[], 'Swcut':[], 'Hwcut':[], 'Swir':[], 'Hwir':[], 'wPI4':[]}
