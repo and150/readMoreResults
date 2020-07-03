@@ -28,10 +28,11 @@ def readMore(currDir, rootName): # read MORE result files
 
     # CTL
     times = []
+    ctl = {}
     with open(currDir+"\\"+rootName+".ctl", "r+b") as file:  
         ctlFile = mmap.mmap(file.fileno(),0)
         from readctl  import readCTL  
-        times = readCTL(ctlFile) 
+        times, ctl = readCTL(ctlFile)
         #ctlFile.close()                   
 
     # RATE
@@ -41,7 +42,7 @@ def readMore(currDir, rootName): # read MORE result files
         RateOut = readRATE(file, numsArray, times) 
         #RateOut = readRATE(mmap.mmap(file.fileno(),0), numsArray, times) 
 
-    return(startDate, times, numsArray, RateOut)
+    return(startDate, times, numsArray, RateOut, ctl)
 
 
 def read_grd(currDir, rootName, out_arrays_names): # read MORE Grid file
@@ -49,6 +50,14 @@ def read_grd(currDir, rootName, out_arrays_names): # read MORE Grid file
     with open(currDir+"\\"+rootName+".grd", "r+b") as file:  
         from readgrd  import read_static_arrays
         return read_static_arrays(file,out_arrays_names) 
+        #return(grd_out)
+
+
+def read_grd1(currDir, rootName, out_arrays_names, gap_dict, ctl): # read MORE ara file
+    # DYNAMIC ARRAYS 
+    with open(currDir+"\\"+rootName+".ara", "r+b") as file:  
+        from readgrd1  import read_arrays
+        return read_arrays(file,out_arrays_names, gap_dict, ctl) 
         #return(grd_out)
 
 
@@ -65,6 +74,7 @@ parser.add_argument("-p","--PLT", action="store_true", help ="generates producti
 parser.add_argument("-c","--CPT", action="store", help ="generates crossplots by certain date", default="-999")
 parser.add_argument("-k","--KH", action="store", help ="get values for perforated cells of static arrays")
 parser.add_argument("-g","--GRAPHS", action="store_true", help ="generates output graphs")
+parser.add_argument("-d","--DYN", action="store_true", help ="get dynamic arrays")
 parser.add_argument("-a","--AVR", action="store_true", help ="generates start oil rates, average oil rates for the first year of production and cumulatieves")
 args = parser.parse_args()
 
@@ -73,44 +83,45 @@ rootName = os.path.basename(args.inputfile).split('.')[0]
 #print(currDir, rootName)
 
 try:
-    """read MORE results """
-    out = readMore(currDir,rootName) # results array
-    startDate, times, numsArray, RateOut = out[0], out[1], out[2], out[3]
+    # read MORE results
+    #out = readMore(currDir,rootName) # results array
+    startDate, times, numsArray, RateOut, ctl = readMore(currDir, rootName)
+    #startDate, times, numsArray, RateOut, ctl = out[0], out[1], out[2], out[3]
     well_names, perfs_array = RateOut[1], RateOut[2]
     plt_items = []
 
     
-    """ crossplot generation """
+    # crossplot generation
     if args.CPT!="-999": 
         from getcpt import getCPT
         getCPT(currDir, rootName, startDate, times, numsArray, RateOut, args.CPT)      
 
-    """ PLT profiles output """
+    # PLT profiles output
     if args.PLT:
         from getplt import getPLT
         plt_items = getPLT(currDir, rootName, startDate, times, numsArray, RateOut)
 
-    """ well test results output (PI) """
+    # well test results output (PI)
     if args.WT:
         from getwt import getWT
         getWT(currDir, rootName, startDate, times, numsArray, RateOut)      
 
-    """ well test results output """
+    # well test results output
     if args.IT:
         from getit import getIT
         getIT(currDir, rootName, startDate, times, numsArray, RateOut)      
         
-    """ well IPR results output (PI) """
+    # well IPR results output (PI)
     if args.IPR:
         from getipr import getIPR
         getIPR(currDir, rootName, startDate, times, numsArray, RateOut)      
         
-    """ GRAPHS output """
+    # GRAPHS output
     if args.GRAPHS:
         from getgraphs import get_graphs
         get_graphs(currDir, rootName, startDate, times, numsArray, RateOut)
 
-    """ GRID read """
+    # read STATIC ARRAYS (GRD)
     if args.KH:
         out_arrays_names = ['DZTV','PERMX', 'PERMY'] #['DZTV','PERMX','PERMY'] 
         out_arrays = read_grd(currDir,rootName, out_arrays_names) # reads some static arrays
@@ -118,8 +129,18 @@ try:
             import getkh
             getkh.get_wells_cells(out_arrays, args.KH, well_names, perfs_array, [x.tos for x in times], startDate, kh_out_file, plt_items)
 
+    # read DYNAMIC ARRAYS (ARA)
+    if args.DYN:
+        import readgrd
+        import readgrd1
+        out_arrays_names = ['PRES'] #, 'SOIL']
+        gap_dict = read_grd(currDir, rootName, [])[2] # get gap array for active map option
+        out_arrays = read_grd1(currDir, rootName, out_arrays_names, gap_dict, ctl) # read dynamic arrays
+        #print(out_arrays)
+        for item in out_arrays[0]:
+            print(item)
 
-    """ start rates, first year av.rates and cumulatives export """
+    # start rates, first year av.rates and cumulatives export
     if args.AVR:
         from getStartRate import getAVRCUM
         getAVRCUM(currDir, rootName, startDate, times, numsArray, RateOut)

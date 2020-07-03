@@ -34,6 +34,8 @@ def readCTL(input_file):
 
     line = ""
     ARR = []
+    #ctl = {}
+    ctl = {'tsn':[], 'wfa':[], 'wfr':[], 'tos':[], 'stl':[], 'plns':[]}
 
     rateNum = 0 # rate records counter
     while True:        
@@ -42,6 +44,12 @@ def readCTL(input_file):
     
         a = CTLline()
         a.getData(line)
+        ctl['tsn'].append(a.tsn)
+        ctl['wfa'].append(a.wfa)
+        ctl['wfr'].append(a.wfr)
+        ctl['tos'].append(a.tos)
+        ctl['stl'].append(a.stl)
+        ctl['plns'].append(a.plns)
         #a.printCTLline()
         ARR.append(a)
         del a
@@ -54,4 +62,13 @@ def readCTL(input_file):
             # debug output
             #print(ARR[i].tsn, ARR[i].wfa, ARR[i].wfr, ARR[i].tos, ARR[i].stl, ARR[i].plns, )
     
-    return times
+
+    #print(ctl)
+    # TODO change times to ctl (without filtering for more universal approach) 
+    # TODO times is currently filtered array!!! (only rate timesteps)
+    #for k, v in ctl.items(): print(k,v)
+    #print()
+    #for i in times: print(i.tsn, i.wfr)
+    #print()
+
+    return (times, ctl)
