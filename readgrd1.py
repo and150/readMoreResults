@@ -18,7 +18,7 @@ def insert_gaps(target_array, gap_dict):
     return target_array
 
 
-
+# TODO make more small functions (read_main_header, read_main_array etc...)
 # READ ARA FILE
 def read_arrays(input_file, out_arrays_names, gap_dict, ctl):
 

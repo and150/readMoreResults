@@ -7,7 +7,7 @@ from datescompare import date2days
 from printrate import printRate
 
 
-def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDate, tstep_i, outFile, search_last_bhp = False):
+def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDate, tstep_i, outFile, search_last_bhp=False, search_last_prod=False):
 
     outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[tstep_i].tos))  # date and time
     outFile.write('{0:s} '.format(curr_well_name) ) # well name
@@ -20,7 +20,6 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
 
     outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Swpt'] + tstep_i]) )  # simulated cumulative water
     outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hwpt'] + tstep_i]) )  # historic cumulative water
-
 
 
     def get_last_defined_bhp(ResArr, T, V, curr_well_index, tstep_i):
@@ -36,6 +35,11 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
         return [ResArr[T*V*curr_well_index + T*cts.i_d['Sbhp'] + tstep_i], 
                 ResArr[T*V*curr_well_index + T*cts.i_d['Hbhp'] + tstep_i], 
                 tstep_i]
+
+
+    def get_last_prod_month_rate():
+        pass
+
 
     # find the latest defined BHP if not defined on the CPT date
     if search_last_bhp:
