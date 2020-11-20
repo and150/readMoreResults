@@ -42,7 +42,7 @@ TB_START_ROW = 23
 def get_statistics(statistics_file_name, well_names):
     wb = load_workbook(statistics_file_name, data_only=True)
     ws = wb[STAT_WORKSHEET]  
-    column_indexes = list(range(1, TB_WIDTH))+[64]
+    column_indexes = list(range(1, TB_WIDTH))+[66] # 64
     header = [ws.cell(TB_START_ROW,col).value for col in column_indexes] # no replacing Delta
     #header = [ ''.join( 'd' if x=='\u0394' else x for x in list(ws.cell(TB_START_ROW,col).value)) for col in range(1,TB_WIDTH)]
 

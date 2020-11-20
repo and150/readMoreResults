@@ -21,7 +21,9 @@ i_d = {
    'Sthp' : 15,
    'Hthp' : 16,
 
-   'wPI4' : 17 }
+   'wPI4' : 17,
+   'wut' : 18
+   }
 
 VEC = len(i_d)
 

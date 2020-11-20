@@ -4,8 +4,10 @@ from getbindata import getBinData
 import constants as cts
 
 def readRATE(input_file, nums=[], times=[]):
+
     class RatesHeader:
     # local class of 1-st time step header    
+
         def __init__(self, mnem="", units="", asname="", descr="", ASIND = [], ASDEPTH = []):    
             self.mnem = mnem     # Mnemonics
             self.units = units   # Units
@@ -21,6 +23,7 @@ def readRATE(input_file, nums=[], times=[]):
             # 7 – Associated second fluid in place region(for inter-region flows)
             # 8-16 are not currently used
             self.ASDEPTH = ASDEPTH # Associated depth array (real)
+
         def getData(self, bts): #!!! used constant byte positions 16 32 48 96 160 !!!
             self.mnem   = str(b''.join(struct.unpack('c'*16,bts[0:16])), 'utf-8') #block[0:16].decode("utf-8")    
             self.units  = str(b''.join(struct.unpack('c'*16,bts[16:32])), 'utf-8') #block[16:32].decode("utf-8")
@@ -32,6 +35,7 @@ def readRATE(input_file, nums=[], times=[]):
                 self.ASIND.append(int.from_bytes(bts[96+i*4:96+i*4+4],'little',signed='true'))
             for i in range(0,4):
                 self.ASDEPTH.append(struct.unpack('f',bts[160+i*4:160+i*4+4])[0] )            
+
         def printRatesHeader(self):
             print(self.mnem)
             print(self.units)
@@ -77,6 +81,7 @@ def readRATE(input_file, nums=[], times=[]):
     Vbase = cts.VEC
 
     nrate = len(times)
+    # TODO ResArr is list! Should be replaced by Numpy array!
     ResArr = [0]*nrate*V*mw  # [ ][timesteps][vectors][wells]  # array structure
     nv = 4 # i, j, k + lgr indexes
     #perfs_array = [] # structured array of perfs [timestep, well_number, [i-index], [j-index], [k-index]]
@@ -98,7 +103,7 @@ def readRATE(input_file, nums=[], times=[]):
         for i in range(NAQUIF):
             AQNAMES.append(getBinData(input_file,'char',16,)) #Aquifer names  
 
-    # history arrays
+    # history and miscellaneous arrays
     qoprh = [-1]*mw
     qwprh = [-1]*mw
     qbhph = [-1]*mw  
@@ -106,6 +111,7 @@ def readRATE(input_file, nums=[], times=[]):
     qwefa = [-1]*mw      
     qthph = [-1]*mw
     wPI4 = [-1]*mw
+    wut = [-1]*mw
 
     #read quantity data (Mnemonics, Units, Associated names, Descriptions) !!!need check!!!!
     HARR = [] # array of vectors' headers (additional vectors miscellaneous
@@ -126,6 +132,7 @@ def readRATE(input_file, nums=[], times=[]):
             if (HARR[i].mnem.strip() == "wefa"  and HARR[i].asname.strip() == WNAMES[j].strip()): qwefa[j] = i              
             if (HARR[i].mnem.strip() == "wthph" and HARR[i].asname.strip() == WNAMES[j].strip()): qthph[j] = i              
             if (HARR[i].mnem.strip() == "wPI4" and HARR[i].asname.strip() == WNAMES[j].strip()): wPI4[j] = i              
+            if (HARR[i].mnem.strip() == "wut" and HARR[i].asname.strip() == WNAMES[j].strip()): wut[j] = i              
             #print(HARR[i].mnem.strip() + " |" + HARR[i].asname.strip()+ "| "+ str(i) + " "+ str(j)+" |" +WNAMES[j].strip()+"| ")
 
     #### debug print ####
@@ -298,6 +305,7 @@ def readRATE(input_file, nums=[], times=[]):
             if(qwefa[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['Hwefa'] + n] = farr[qwefa[j]] # get history wefa if any 
             if(qthph[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['Hthp'] + n] = farr[qthph[j]] # get history bhp if any 
             if(wPI4[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['wPI4'] + n] = farr[wPI4[j]] # get wPI4 if any
+            if(wut[j] >= 0 ): ResArr[nrate*V*j + nrate*cts.i_d['wut'] + n] = farr[wut[j]] # get well uptime if any
             # calculation of history cumulatives
             if(n==0):
                 ResArr[nrate*V*j + nrate*cts.i_d['Hopt'] + n] = 0 + ResArr[nrate*V*j + nrate*cts.i_d['Hopr'] + n] * times[n].tos / 1000

@@ -9,19 +9,6 @@ from printrate import printRate
 
 def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDate, tstep_i, outFile, search_last_bhp=False, search_last_prod=False):
 
-    outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[tstep_i].tos))  # date and time
-    outFile.write('{0:s} '.format(curr_well_name) ) # well name
-    
-    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Sopt'] + tstep_i]) )  # simulated cumulative oil
-    outFile.write('{0:3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hopt'] + tstep_i]) )  # historic cumulative oil
-
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Swit'] + tstep_i]) )  # simulated cumulative injection
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hwit'] + tstep_i]) )  # historic cumulative injection
-
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Swpt'] + tstep_i]) )  # simulated cumulative water
-    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hwpt'] + tstep_i]) )  # historic cumulative water
-
-
     def get_last_defined_bhp(ResArr, T, V, curr_well_index, tstep_i):
         search_tstep_i = tstep_i
         while search_tstep_i > 0:
@@ -37,8 +24,43 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
                 tstep_i]
 
 
-    def get_last_prod_month_rate():
-        pass
+    def get_last_prod_month(ResArr, T, V, curr_well_index, tstep_i):
+        start_wut = ResArr[T*V*curr_well_index + T*cts.i_d['wut'] + tstep_i]
+
+        search_tstep_i = tstep_i
+        while search_tstep_i > 0:
+            if start_wut - ResArr[T*V*curr_well_index + T*cts.i_d['wut'] + search_tstep_i] >= 30:
+                return ( ResArr[T*V*curr_well_index + T*cts.i_d['Sopt'] + search_tstep_i],
+                         ResArr[T*V*curr_well_index + T*cts.i_d['Hopt'] + search_tstep_i],
+                         ResArr[T*V*curr_well_index + T*cts.i_d['Swpt'] + search_tstep_i],
+                         ResArr[T*V*curr_well_index + T*cts.i_d['Hwpt'] + search_tstep_i])
+            search_tstep_i -= 1
+
+        # if something wrong
+        return (-999.0, -999.0, -999.0, -999.0) 
+
+
+
+    outFile.write('{0:s} {1:5.2f} '.format(cptDate, times[tstep_i].tos))  # date and time
+    outFile.write('{0:s} '.format(curr_well_name) ) # well name
+    
+    if search_last_prod:
+        latest_prod = get_last_prod_month(ResArr, T, V, curr_well_index, tstep_i)
+        outFile.write('{0:5.3f} '.format(latest_prod[0]) )  # simulated cumulative oil
+        outFile.write('{0:5.3f} '.format(latest_prod[1]) )  # historic cumulative oil
+        outFile.write('{0:5.3f} '.format(latest_prod[2]) )  # simulated cumulative water
+        outFile.write('{0:5.3f} '.format(latest_prod[3]) )  # historic cumulative water
+
+    else:
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Sopt'] + tstep_i]) )  # simulated cumulative oil
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hopt'] + tstep_i]) )  # historic cumulative oil
+        
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Swpt'] + tstep_i]) )  # simulated cumulative water
+        outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hwpt'] + tstep_i]) )  # historic cumulative water
+
+
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Swit'] + tstep_i]) )  # simulated cumulative injection
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['Hwit'] + tstep_i]) )  # historic cumulative injection
 
 
     # find the latest defined BHP if not defined on the CPT date
@@ -60,6 +82,10 @@ def printCptByDate(ResArr, times, T, V,  curr_well_name, curr_well_index,  cptDa
         # print THP
         outFile.write(f"{ResArr[T*V*curr_well_index + T*cts.i_d['Sthp'] + tstep_i]:5.3f} ")  # simulated THP
         outFile.write(f"{ResArr[T*V*curr_well_index + T*cts.i_d['Hthp'] + tstep_i]:5.3f} ")  # historic THP
+
+
+    outFile.write('{0:5.3f} '.format(ResArr[T*V*curr_well_index + T*cts.i_d['wut'] + tstep_i]) )  # simulated Uptime 
+
 
 # function gets date-time and returns timestep number or -1 if date-time not found
 def getTimeStepNumber(times, startDate, stringDate="01.01.1900 00:00:00"):
@@ -116,8 +142,9 @@ def getCPT(currDir, rootName, startDate, times, numsArray, RateOut, cptDate):
         for curr_well_name in wellNames:
             curr_well_index = (wellNames.index(curr_well_name))
             if curr_well_name[0:4] == "WQ2-" or curr_well_name in ["WQ-11", "WQ-13"]: # !!! WQ filter !!!
-                printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate, tstep_i, cptOutFile, False)
-                printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate_month_behind, tstep_j, cptOutFile)
+            #if True:
+                printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate,              tstep_i, cptOutFile, False, False)
+                printCptByDate(ResArr, times, T, V, curr_well_name, curr_well_index, cptDate_month_behind, tstep_j, cptOutFile, False, True)
                 cptOutFile.write('\n')
                 #print()
     else:
